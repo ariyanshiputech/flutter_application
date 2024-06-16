@@ -5,12 +5,9 @@ import 'package:flutter_application/welcome_screen.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:flutter_application/utils/constants/text_strings.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
-import 'package:lehttp_overrides/lehttp_overrides.dart';
 
 void main() {
-  if (Platform.isAndroid) {
-    HttpOverrides.global = LEHttpOverrides();
-  }
+    HttpOverrides.global = MyHttpOverrides();
   runApp(const MyApp());
 }
 
@@ -35,5 +32,13 @@ class MyApp extends StatelessWidget {
   
     
      
+  }
+}
+
+ class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext? context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
   }
 }
