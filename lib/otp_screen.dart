@@ -80,7 +80,7 @@ class _OTPScreenState extends State<OTPScreen> {
                 minHeight: constraints.maxHeight,
               ),
               child: Padding(
-                padding: EdgeInsets.all(TSizes.tDefaultSize).copyWith(
+                padding: const EdgeInsets.all(TSizes.tDefaultSize).copyWith(
                   bottom: MediaQuery.of(context).viewInsets.bottom + TSizes.tDefaultSize,
                 ),
                 child: Column(
