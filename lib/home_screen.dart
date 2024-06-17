@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/profile_screen.dart';
 
 
 class HomeScreen extends StatelessWidget {
@@ -45,6 +46,18 @@ class HomeScreen extends StatelessWidget {
               title: const Text('Contact'),
               onTap: () {
                 Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.verified_user),
+              title: const Text('Contact'),
+              onTap: () {
+                Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProfileScreen(),
+                ),
+          );
               },
             ),
           ],

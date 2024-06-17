@@ -16,14 +16,14 @@ class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _SignUpScreenState createState() => _SignUpScreenState();
+  SignUpScreenState createState() => SignUpScreenState();
 }
 
-class _SignUpScreenState extends State<SignUpScreen> {
+class SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _deviceKeyController = TextEditingController();
   final TextEditingController _ipAddressController = TextEditingController();
   File? _profileImage;
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -75,13 +75,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final String deviceKey = _deviceKeyController.text;
     final String ipAddress = _ipAddressController.text;
 
-    final url = Uri.parse('https://lalpoolnetwork.net/api/v2/apps/signup');
-
+    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/signup');
+    
     try {
       final response = await http.post(
         url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
         body: jsonEncode(<String, String>{
           'name': name,
@@ -92,7 +95,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }),
       );
 
-     if (response.statusCode == 201 || response.statusCode == 200) {
+      if (response.statusCode == 201 || response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
           final String phoneNumber = responseData['user']['phone'];
@@ -103,21 +106,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
           }
           // Navigate to the OTP screen with the phone number
           Navigator.push(
-            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
-              builder: (context) => OTPScreen(phoneNumber: phoneNumber, userID : userID),
+              builder: (context) => OTPScreen(phoneNumber: phoneNumber, userID: userID),
             ),
           );
         }
       } else {
-        // If the server did not return a 200 OK response,
-        // then throw an exception.
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        setState(() {
+          _errorMessage = responseData['message'] ?? 'Failed to sign up. Please try again.';
+        });
         if (kDebugMode) {
-          print('Failed to sign up');
+          print('Failed to sign up. Status code: ${response.statusCode}');
+          print('Response body: ${response.body}');
         }
       }
     } catch (e) {
+      setState(() {
+        _errorMessage = 'Error occurred while signing up: $e';
+      });
       if (kDebugMode) {
         print('Error occurred while signing up: $e');
       }
@@ -201,6 +209,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ipAddressController: _ipAddressController,
                   onSubmit: _submitForm,
                 ),
+                if (_errorMessage.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Text(
+                      _errorMessage,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
               ],
             ),
           ),
