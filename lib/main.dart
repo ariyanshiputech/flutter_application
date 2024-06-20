@@ -1,9 +1,8 @@
 import 'dart:io';
 
+import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/welcome_screen.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:flutter_application/utils/constants/text_strings.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 
 void main() {
@@ -16,20 +15,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return GetMaterialApp(
-      title: TTexts.appName,
-      themeMode: ThemeMode.system,
-      theme: TAppTheme.lightTheme,
-      darkTheme: TAppTheme.darkTheme,
-      debugShowCheckedModeBanner: false,
-      // initialBinding: GeneralBindings(),
-       home: const WelcomeScreen(),
-      routes: {
-        '/welcome': (context) => const WelcomeScreen(),
-      },
-    );
-  
+   return ThemeProvider(
+      initTheme: TAppTheme.lightTheme, // Initial theme
+      builder: (_, myTheme) {
+        return MaterialApp(
+          title: "Lalpool Wifi ZOne",
+          themeMode: ThemeMode.light,
+          theme: TAppTheme.lightTheme,
+          darkTheme: TAppTheme.darkTheme,
+          debugShowCheckedModeBanner: false,
+          // initialBinding: GeneralBindings(),
+          home: const WelcomeScreen(),
+          routes: {
+            '/welcome': (context) => const WelcomeScreen(),
+          },
+        );
+      });
     
      
   }

@@ -15,20 +15,23 @@ class OTPScreen extends StatefulWidget {
   const OTPScreen({super.key, required this.phoneNumber, required this.userID});
 
   @override
-  _OTPScreenState createState() => _OTPScreenState();
+  OTPScreenState createState() => OTPScreenState();
 }
 
-class _OTPScreenState extends State<OTPScreen> {
+class OTPScreenState extends State<OTPScreen> {
   String _otpCode = '';
 
   Future<void> _verifyOTP(BuildContext context) async {
-    final url = Uri.parse('https://lalpoolnetwork.net/api/v2/apps/otp_verification');
+    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/otp_verification');
 
     try {
       final response = await http.post(
         url,
-        headers: <String, String>{
+         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
         body: jsonEncode(<String, dynamic>{
           'user_id': widget.userID,
@@ -49,13 +52,21 @@ class _OTPScreenState extends State<OTPScreen> {
           Future.delayed(const Duration(seconds: 2), () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
+            MaterialPageRoute(builder: (context) => HomeScreen(userData: responseData['user']),
+            )
             );
           });
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('OTP verification failed. Please try again.')),
-          );
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+         if (responseData['success'] == false) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(responseData['errors']),
+                ),
+              );
+            }
+
+          
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

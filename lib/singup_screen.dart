@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/otp_screen.dart';
+import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/utils/constants/sizes.dart';
@@ -23,7 +25,10 @@ class SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _deviceKeyController = TextEditingController();
   final TextEditingController _ipAddressController = TextEditingController();
   File? _profileImage;
-  String _errorMessage = '';
+  String _phoneErrorMessage = '';
+  String _nameErrorMessage = '';
+  String _macAddressErrorMessage = '';
+  bool _isSubmitting = false; // Add a flag for loading state
 
   @override
   void initState() {
@@ -72,11 +77,15 @@ class SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _submitForm(String name, String phoneNo, String macAddress) async {
+    setState(() {
+      _isSubmitting = true;
+    });
+
     final String deviceKey = _deviceKeyController.text;
     final String ipAddress = _ipAddressController.text;
 
     final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/signup');
-    
+
     try {
       final response = await http.post(
         url,
@@ -115,7 +124,9 @@ class SignUpScreenState extends State<SignUpScreen> {
       } else {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         setState(() {
-          _errorMessage = responseData['message'] ?? 'Failed to sign up. Please try again.';
+          _nameErrorMessage = responseData['errors']?['name']?.first ?? '';
+          _phoneErrorMessage = responseData['errors']?['phoneNo']?.first ?? '';
+          _macAddressErrorMessage = responseData['errors']?['macAddress']?.first ?? '';
         });
         if (kDebugMode) {
           print('Failed to sign up. Status code: ${response.statusCode}');
@@ -124,11 +135,14 @@ class SignUpScreenState extends State<SignUpScreen> {
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error occurred while signing up: $e';
       });
       if (kDebugMode) {
         print('Error occurred while signing up: $e');
       }
+    } finally {
+      setState(() {
+        _isSubmitting = false;
+      });
     }
   }
 
@@ -208,15 +222,11 @@ class SignUpScreenState extends State<SignUpScreen> {
                   deviceKeyController: _deviceKeyController,
                   ipAddressController: _ipAddressController,
                   onSubmit: _submitForm,
+                  nameErrorMessage: _nameErrorMessage,
+                  phoneErrorMessage: _phoneErrorMessage,
+                  macAddressErrorMessage: _macAddressErrorMessage,
+                  isSubmitting: _isSubmitting,
                 ),
-                if (_errorMessage.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Text(
-                      _errorMessage,
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
               ],
             ),
           ),
@@ -226,25 +236,76 @@ class SignUpScreenState extends State<SignUpScreen> {
   }
 }
 
-class FormSection extends StatelessWidget {
+class FormSection extends StatefulWidget {
   final TextEditingController deviceKeyController;
   final TextEditingController ipAddressController;
-  final Function(String, String, String) onSubmit;
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final Future<void> Function(String, String, String) onSubmit;
+  final String nameErrorMessage;
+  final String phoneErrorMessage;
+  final String macAddressErrorMessage;
+  final bool isSubmitting; // Add a flag for loading state
 
-  FormSection({
-    super.key,
+  const FormSection({
+    Key? key,
     required this.deviceKeyController,
     required this.ipAddressController,
     required this.onSubmit,
-  });
+    required this.nameErrorMessage,
+    required this.phoneErrorMessage,
+    required this.macAddressErrorMessage,
+    required this.isSubmitting,
+  }) : super(key: key);
+
+  @override
+  _FormSectionState createState() => _FormSectionState();
+}
+
+class _FormSectionState extends State<FormSection> {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController phoneNoController = TextEditingController();
+  final TextEditingController macAddressController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String? nameError;
+  String? phoneError;
+  String? macAddressError;
+
+  @override
+  void initState() {
+    super.initState();
+    nameError = widget.nameErrorMessage;
+    phoneError = widget.phoneErrorMessage;
+    macAddressError = widget.macAddressErrorMessage;
+  }
+
+  @override
+  void didUpdateWidget(covariant FormSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (    widget.nameErrorMessage != oldWidget.nameErrorMessage) {
+      setState(() {
+        nameError = widget.nameErrorMessage;
+      });
+    }
+    if (widget.phoneErrorMessage != oldWidget.phoneErrorMessage) {
+      setState(() {
+        phoneError = widget.phoneErrorMessage;
+      });
+    }
+    if (widget.macAddressErrorMessage != oldWidget.macAddressErrorMessage) {
+      setState(() {
+        macAddressError = widget.macAddressErrorMessage;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController nameController = TextEditingController();
-    final TextEditingController phoneNoController = TextEditingController();
-    final TextEditingController macAddressController = TextEditingController();
-
+    final isPlatformDark =
+        // ignore: deprecated_member_use
+        WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+    final initTheme = isPlatformDark ?  TAppTheme.darkTheme : TAppTheme.lightTheme;
+    return ThemeProvider(
+      initTheme: initTheme,
+      builder: (_, myTheme) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 30),
       child: Form(
@@ -258,15 +319,19 @@ class FormSection extends StatelessWidget {
                 label: const Text("Name"),
                 prefixIcon: const Icon(Icons.person_outline_rounded),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
+                borderRadius: BorderRadius.circular(10.0),
+                borderSide: BorderSide(color: nameError != null ? Colors.red : Colors.grey),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Name is required';
-                }
-                return null;
-              },
+              errorText: nameError,
+               
+              ),
+              // Commenting out the local validation for name
+              // validator: (value) {
+              //   if (value == null || value.isEmpty) {
+              //     return 'Name is required';
+              //   }
+              //   return null;
+              // },
             ),
             const SizedBox(height: 20),
             TextFormField(
@@ -277,17 +342,19 @@ class FormSection extends StatelessWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
+                errorText: phoneError,
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Phone No is required';
-                }
-                return null;
-              },
+              // Commenting out the local validation for phone number
+              // validator: (value) {
+              //   if (value == null || value.isEmpty) {
+              //     return 'Phone number is required';
+              //   }
+              //   return null;
+              // },
             ),
             const SizedBox(height: 20),
             TextFormField(
-              controller: deviceKeyController,
+              controller: widget.deviceKeyController,
               decoration: InputDecoration(
                 label: const Text("Device Key"),
                 prefixIcon: const Icon(Icons.device_hub),
@@ -296,16 +363,10 @@ class FormSection extends StatelessWidget {
                 ),
                 enabled: false,
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Device Key is required';
-                }
-                return null;
-              },
             ),
             const SizedBox(height: 20),
             TextFormField(
-              controller: ipAddressController,
+              controller: widget.ipAddressController,
               decoration: InputDecoration(
                 label: const Text("IP Address"),
                 prefixIcon: const Icon(Icons.device_thermostat_sharp),
@@ -314,12 +375,6 @@ class FormSection extends StatelessWidget {
                 ),
                 enabled: false,
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'IP Address is required';
-                }
-                return null;
-              },
             ),
             const SizedBox(height: 20),
             TextFormField(
@@ -330,25 +385,32 @@ class FormSection extends StatelessWidget {
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10.0),
                 ),
+                errorText: macAddressError,
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Mac Address is required';
-                }
-                return null;
-              },
+              // Commenting out the local validation for MAC address
+              // validator: (value) {
+              //   if (value == null || value.isEmpty) {
+              //     return 'Mac Address is required';
+              //   }
+              //   return null;
+              // },
             ),
             const SizedBox(height: 30),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    onSubmit(
-                      nameController.text,
-                      phoneNoController.text,
-                      macAddressController.text,
-                    );
+                onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                  setState(() {
+                    nameError = null;
+                    phoneError = null;
+                    macAddressError = null;
+                  });
+                  await widget.onSubmit(
+                    nameController.text,
+                    phoneNoController.text,
+                    macAddressController.text,
+                  );
                   }
                 },
                 child: const Text("SIGN UP"),
@@ -358,5 +420,6 @@ class FormSection extends StatelessWidget {
         ),
       ),
     );
+  });
   }
 }
