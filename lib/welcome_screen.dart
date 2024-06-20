@@ -13,7 +13,7 @@ import 'package:flutter_application/utils/constants/sizes.dart';
 import 'package:flutter_application/utils/constants/text_strings.dart';
 
 class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+  const WelcomeScreen({super.key});
 
   @override
   WelcomeScreenState createState() => WelcomeScreenState();
@@ -116,7 +116,8 @@ class WelcomeScreenState extends State<WelcomeScreen> {
     final isDarkMode = brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDarkMode ? TColors.tSecondaryColor : TColors.tPrimaryColor,
+      backgroundColor:
+          isDarkMode ? TColors.tSecondaryColor : TColors.tPrimaryColor,
       body: Container(
         padding: const EdgeInsets.all(TSizes.tDefaultSize),
         child: Column(
@@ -144,12 +145,15 @@ class WelcomeScreenState extends State<WelcomeScreen> {
                       if (!isVerified) {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => const SignUpScreen()),
                         );
                       }
                     },
                     child: Text(
-                      isVerified ? TTexts.tContinue.toUpperCase() : TTexts.tSignup.toUpperCase(),
+                      isVerified
+                          ? TTexts.tContinue.toUpperCase()
+                          : TTexts.tSignup.toUpperCase(),
                     ),
                   ),
                 ),
