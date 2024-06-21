@@ -246,7 +246,7 @@ class FormSection extends StatefulWidget {
   final bool isSubmitting; // Add a flag for loading state
 
   const FormSection({
-    Key? key,
+    super.key,
     required this.deviceKeyController,
     required this.ipAddressController,
     required this.onSubmit,
@@ -254,7 +254,7 @@ class FormSection extends StatefulWidget {
     required this.phoneErrorMessage,
     required this.macAddressErrorMessage,
     required this.isSubmitting,
-  }) : super(key: key);
+  });
 
   @override
   _FormSectionState createState() => _FormSectionState();

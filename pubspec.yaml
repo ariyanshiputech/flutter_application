@@ -39,6 +39,8 @@ dependencies:
   permission_handler: ^11.3.1
   line_awesome_flutter: ^3.0.1
   animated_theme_switcher: ^2.0.10
+  fancy_bottom_navigation_plus: ^1.0.3
+  fancy_bottom_navigation_2: ^0.3.5
   
 dev_dependencies:
   flutter_test:
