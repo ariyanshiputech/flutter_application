@@ -14,7 +14,7 @@ class TAppTheme {
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Roboto',
+    fontFamily: 'Poppins',
     disabledColor: TColors.grey,
     brightness: Brightness.light,
     primaryColor: TColors.primary,

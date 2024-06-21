@@ -43,6 +43,12 @@ class NotificationScreenState extends State<NotificationScreen>
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              widget.onNavigateToPage(0); // Navigate back to home page
+            },
+          ),
           title: const Padding(
             padding: EdgeInsets.all(8.0),
             child: Center(child: Text('Notifications')),

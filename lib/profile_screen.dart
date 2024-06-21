@@ -29,6 +29,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              widget.onNavigateToPage(0); // Navigate back to home page
+            },
+          ),
           title: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Center(
