@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application/home_screen.dart';
+import 'package:flutter_application/main_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/welcome_screen.dart';
@@ -81,7 +81,7 @@ class SplashScreenState extends State<SplashScreen> {
             // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
-              builder: (context) => HomeScreen(userData: responseData['user']),
+              builder: (context) => MainScreen(userData: responseData['user']),
             ),
           );
           if (kDebugMode) {
@@ -103,6 +103,16 @@ class SplashScreenState extends State<SplashScreen> {
           }
         }
       } else {
+         setState(() {
+            isVerified = false;
+          });
+          Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
+            context,
+            MaterialPageRoute(
+              builder: (context) => const WelcomeScreen(),
+            ),
+          );
         if (kDebugMode) {
           print('Request failed with status: ${response.statusCode}.');
         }

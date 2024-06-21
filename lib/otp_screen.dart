@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/home_screen.dart';  // Make sure this import points to your home_screen.dart file
+import 'package:flutter_application/main_screen.dart';
 import 'package:flutter_application/utils/constants/sizes.dart';
 import 'package:flutter_application/utils/constants/text_strings.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
@@ -53,7 +53,7 @@ class OTPScreenState extends State<OTPScreen> {
           Future.delayed(const Duration(seconds: 2), () {
             Navigator.pushReplacement(
               context,
-            MaterialPageRoute(builder: (context) => HomeScreen(userData: responseData['user']),
+            MaterialPageRoute(builder: (context) => MainScreen(userData: responseData['user']),
             )
             );
           });

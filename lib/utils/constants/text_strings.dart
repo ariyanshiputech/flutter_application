@@ -110,7 +110,7 @@ static const String tDontHaveAnAccount = "Don't have an Account? ";
 
 
 // -- Sign Up Screen Text
-static const String tSignUpTitle = "Get On Board!";
+static const String tSignUpTitle = "SIGN UP Here!";
 static const String tSignUpSubTitle = "Create your profile to start your Journey.";
 static const String tAlreadyHaveAnAccount = "Already have an Account? ";
 

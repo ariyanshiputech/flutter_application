@@ -4,6 +4,7 @@ import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/otp_screen.dart';
+import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application/utils/constants/image_strings.dart';
@@ -149,89 +150,132 @@ class SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(TSizes.tDefaultSize),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FormHeaderWidget(
-                  image: TImages.darkAppLogo,
-                  title: TTexts.tSignUpTitle,
-                  subTitle: TTexts.tSignUpSubTitle,
-                  imageHeight: 0.15,
-                  isAvatarPresent: true,
-                  avatar: _profileImage != null
-                      ? GestureDetector(
-                          onTap: _pickImage,
-                          child: Stack(
-                            children: [
-                              CircleAvatar(
-                                radius: 50,
-                                backgroundImage: FileImage(_profileImage!),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.blue,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.edit,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : GestureDetector(
-                          onTap: _pickImage,
-                          child: Stack(
-                            children: [
-                              const CircleAvatar(
-                                radius: 50,
-                                backgroundImage: AssetImage(TImages.user),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: Container(
-                                  padding: const EdgeInsets.all(3),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.blue,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.edit,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+    final theme = ThemeModelInheritedNotifier.of(context).theme;
+
+     return ThemeSwitchingArea(
+      child: Builder(
+        builder: (context) {
+          // ignore: deprecated_member_use
+      return SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+          automaticallyImplyLeading: false, // Hides the automatically added back button
+          actions: [
+            ThemeSwitcher(
+              clipper: const ThemeSwitcherCircleClipper(),
+              builder: (context) {
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: TColors.tPrimaryColor, // Background color
+                        borderRadius: BorderRadius.circular(50), // Border radius
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          theme.brightness == Brightness.dark ? Icons.wb_sunny : Icons.nights_stay,
                         ),
-                ),
-                const SizedBox(height: TSizes.tFormHeight - 10),
-                const SizedBox(height: 20),
-                FormSection(
-                  deviceKeyController: _deviceKeyController,
-                  ipAddressController: _ipAddressController,
-                  onSubmit: _submitForm,
-                  nameErrorMessage: _nameErrorMessage,
-                  phoneErrorMessage: _phoneErrorMessage,
-                  macAddressErrorMessage: _macAddressErrorMessage,
-                  isSubmitting: _isSubmitting,
-                ),
-              ],
+                        onPressed: () {
+                          ThemeSwitcher.of(context).changeTheme(
+                            theme: theme.brightness == Brightness.light ? TAppTheme.darkTheme : TAppTheme.lightTheme,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                );
+
+              },
+            ),
+          ],
+          ),
+          body: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(TSizes.tDefaultSize),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FormHeaderWidget(
+                    image: TImages.darkAppLogo,
+                    title: TTexts.tSignUpTitle,
+                    subTitle: TTexts.tSignUpSubTitle,
+                    imageHeight: 0.15,
+                    isAvatarPresent: true,
+                    avatar: _profileImage != null
+                        ? GestureDetector(
+                            onTap: _pickImage,
+                            child: Stack(
+                              children: [
+                                CircleAvatar(
+                                  radius: 50,
+                                  backgroundImage: FileImage(_profileImage!),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.blue,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.edit,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: _pickImage,
+                            child: Stack(
+                              children: [
+                                const CircleAvatar(
+                                  radius: 50,
+                                  backgroundImage: AssetImage(TImages.user),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(3),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.blue,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.edit,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: TSizes.tFormHeight - 10),
+                  const SizedBox(height: 20),
+                  FormSection(
+                    deviceKeyController: _deviceKeyController,
+                    ipAddressController: _ipAddressController,
+                    onSubmit: _submitForm,
+                    nameErrorMessage: _nameErrorMessage,
+                    phoneErrorMessage: _phoneErrorMessage,
+                    macAddressErrorMessage: _macAddressErrorMessage,
+                    isSubmitting: _isSubmitting,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+      );
+       },
       ),
     );
   }

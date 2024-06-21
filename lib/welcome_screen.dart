@@ -10,13 +10,8 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var mediaQuery = MediaQuery.of(context);
-    var brightness = mediaQuery.platformBrightness;
-    final isDarkMode = brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor:
-          isDarkMode ? TColors.tSecondaryColor : TColors.tPrimaryColor,
+      backgroundColor: TColors.tPrimaryColor,
       body: Container(
         padding: const EdgeInsets.all(TSizes.tDefaultSize),
         child: Column(
