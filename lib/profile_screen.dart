@@ -31,9 +31,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         appBar: AppBar(
           title: Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Profile of ${widget.userData['name'] ?? 'User'}',
-              style: const TextStyle(fontSize: 16),
+            child: Center(
+              child: Text(
+                'Profile of ${widget.userData['name'] ?? 'User'}',
+                style: const TextStyle(fontSize: 16),
+              ),
             ),
           ),
           actions: [

@@ -43,10 +43,9 @@ class NotificationScreenState extends State<NotificationScreen>
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false, // Hides the automatically added back button
           title: const Padding(
             padding: EdgeInsets.all(8.0),
-            child: Text('Notifications'),
+            child: Center(child: Text('Notifications')),
           ),
           backgroundColor: TColors.tPrimaryColor,
           actions: [
