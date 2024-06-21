@@ -29,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context) {
           final theme = ThemeModelInheritedNotifier.of(context).theme;
 
+          // ignore: deprecated_member_use
           return WillPopScope(
             onWillPop: _onWillPop,
             child: Scaffold(

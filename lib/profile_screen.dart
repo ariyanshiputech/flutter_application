@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/home_screen.dart'; // Make sure you import your HomeScreen file
 import 'package:flutter_application/notification_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
-import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 

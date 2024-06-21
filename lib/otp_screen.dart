@@ -43,6 +43,7 @@ class OTPScreenState extends State<OTPScreen> {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
           QuickAlert.show(
+            // ignore: use_build_context_synchronously
             context: context,
             type: QuickAlertType.success,
             text: 'Completed Registration!',
@@ -59,6 +60,7 @@ class OTPScreenState extends State<OTPScreen> {
         } else {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
          if (responseData['success'] == false) {
+              // ignore: use_build_context_synchronously
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(responseData['errors']),
@@ -69,11 +71,13 @@ class OTPScreenState extends State<OTPScreen> {
           
         }
       } else {
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Server error. Please try again later.')),
         );
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An error occurred: $e')),
       );

@@ -115,6 +115,7 @@ class SignUpScreenState extends State<SignUpScreen> {
           }
           // Navigate to the OTP screen with the phone number
           Navigator.push(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
               builder: (context) => OTPScreen(phoneNumber: phoneNumber, userID: userID),
@@ -257,10 +258,10 @@ class FormSection extends StatefulWidget {
   });
 
   @override
-  _FormSectionState createState() => _FormSectionState();
+  FormSectionState createState() => FormSectionState();
 }
 
-class _FormSectionState extends State<FormSection> {
+class FormSectionState extends State<FormSection> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneNoController = TextEditingController();
   final TextEditingController macAddressController = TextEditingController();

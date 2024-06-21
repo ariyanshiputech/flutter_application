@@ -37,6 +37,7 @@ class NotificationScreenState extends State<NotificationScreen>
         widget.userData['unsuccessfulNotifications'] ?? [];
 
     return ThemeSwitchingArea(
+      // ignore: deprecated_member_use
       child: WillPopScope(
         onWillPop: _onWillPop,
         child: Scaffold(
@@ -76,7 +77,7 @@ class NotificationScreenState extends State<NotificationScreen>
             children: [
               Container(
                 padding:
-                    EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 child: Row(
                   children: [
                     Expanded(
@@ -166,14 +167,14 @@ class NotificationScreenState extends State<NotificationScreen>
 
   Widget _buildNotificationList(List notifications) {
     if (notifications.isEmpty) {
-      return Center(child: Text('No notifications available'));
+      return const Center(child: Text('No notifications available'));
     }
 
     return ListView.builder(
       itemCount: notifications.length,
       itemBuilder: (context, index) {
         return ListTile(
-          leading: Icon(Icons.notifications, color: TColors.tPrimaryColor),
+          leading: const Icon(Icons.notifications, color: TColors.tPrimaryColor),
           title: Text(notifications[index]),
         );
       },

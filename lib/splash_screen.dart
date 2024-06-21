@@ -78,6 +78,7 @@ class SplashScreenState extends State<SplashScreen> {
             isVerified = true;
           });
           Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
               builder: (context) => HomeScreen(userData: responseData['user']),
@@ -91,6 +92,7 @@ class SplashScreenState extends State<SplashScreen> {
             isVerified = false;
           });
           Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
               builder: (context) => const WelcomeScreen(),
