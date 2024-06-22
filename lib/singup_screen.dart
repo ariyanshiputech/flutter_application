@@ -14,7 +14,6 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:flutter_application/form_header_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:android_id/android_id.dart';
-
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -88,6 +87,12 @@ class SignUpScreenState extends State<SignUpScreen> {
     final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/signup');
 
     try {
+      String? base64Image;
+      if (_profileImage != null) {
+        List<int> imageBytes = await _profileImage!.readAsBytes();
+        base64Image = base64Encode(imageBytes);
+      }
+
       final response = await http.post(
         url,
         headers: <String, String>{
@@ -102,6 +107,7 @@ class SignUpScreenState extends State<SignUpScreen> {
           'deviceKey': deviceKey,
           'ipAddress': ipAddress,
           'macAddress': macAddress,
+          if (base64Image != null) 'profileImage': base64Image,
         }),
       );
 
@@ -219,7 +225,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(3),
                                     decoration: const BoxDecoration(
-                                      color: Colors.blue,
+                                      color: TColors.tPrimaryColor,
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -245,7 +251,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.all(3),
                                     decoration: const BoxDecoration(
-                                      color: Colors.blue,
+                                      color: TColors.tPrimaryColor,
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(

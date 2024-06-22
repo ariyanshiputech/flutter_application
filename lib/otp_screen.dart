@@ -53,7 +53,8 @@ class OTPScreenState extends State<OTPScreen> {
           Future.delayed(const Duration(seconds: 2), () {
             Navigator.pushReplacement(
               context,
-            MaterialPageRoute(builder: (context) => MainScreen(userData: responseData['user']),
+            // ignore: avoid_types_as_parameter_names
+            MaterialPageRoute(builder: (context) => MainScreen(userData: responseData['user'], onNavigateToPage: (int ) { return 1; },),
             )
             );
           });

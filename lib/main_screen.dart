@@ -9,8 +9,9 @@ import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 class MainScreen extends StatefulWidget {
   final Map<dynamic, dynamic> userData;
+  final Function(int) onNavigateToPage;
 
-  const MainScreen({super.key, required this.userData});
+  const MainScreen({super.key, required this.userData, required this.onNavigateToPage});
 
   @override
   MainScreenState createState() => MainScreenState();
@@ -45,9 +46,9 @@ class MainScreenState extends State<MainScreen> {
                 textColor: TColors.tPrimaryColor,
                 initialSelection: currentPage,
                 tabs: [
-                  TabData(iconData: LineAwesomeIcons.home_solid, title: "Home"),
-                  TabData(iconData: LineAwesomeIcons.user, title: "Profile"),
-                  TabData(iconData: LineAwesomeIcons.bell, title: "Notification"),
+                  TabData(iconData: LineAwesomeIcons.home_solid, title: ""),
+                  TabData(iconData: LineAwesomeIcons.user, title: ""),
+                  TabData(iconData: LineAwesomeIcons.bell, title: ""),
                 ],
                 onTabChangedListener: (position) {
                   setState(() {
@@ -65,17 +66,11 @@ class MainScreenState extends State<MainScreen> {
   Widget _getPageContent(int page) {
     switch (page) {
       case 0:
-        return HomeScreen(userData: widget.userData);
+        return HomeScreen(userData: widget.userData, onNavigateToPage: updatePage);
       case 1:
-        return ProfileScreen(
-          userData: widget.userData,
-          onNavigateToPage: updatePage,
-        );
+        return ProfileScreen(userData: widget.userData, onNavigateToPage: updatePage);
       case 2:
-        return NotificationScreen(
-          userData: widget.userData,
-          onNavigateToPage: updatePage,
-        );
+        return NotificationScreen(userData: widget.userData, onNavigateToPage: updatePage);
       default:
         return const Text('Invalid Page');
     }

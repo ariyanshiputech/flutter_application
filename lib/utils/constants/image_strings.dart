@@ -151,6 +151,7 @@ class TImages {
 
   //Profile
   static const String user = "assets/images/content/user.png";
+  static const String placeholderimage = "assets/images/150.png";
 
   // -- Payment Methods
   static const String applePay = "assets/icons/payment_methods/apple-pay.png";

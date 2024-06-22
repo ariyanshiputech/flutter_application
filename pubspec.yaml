@@ -35,6 +35,8 @@ dependencies:
   animated_theme_switcher: ^2.0.10
   fancy_bottom_navigation_plus: ^1.0.3
   fancy_bottom_navigation_2: ^0.3.5
+  aamarpay: ^1.0.9
+  webview_flutter: ^4.8.0
   
 dev_dependencies:
   flutter_test:
@@ -92,7 +94,7 @@ flutter:
           style: italic
         - asset: assets/fonts/Roboto-Bold.ttf
           weight: 600
-        - asset: assets/fonts/PopRobotopins-BoldItalic.ttf
+        - asset: assets/fonts/Roboto-BoldItalic.ttf
           weight: 600
           style: italic
         - asset: assets/fonts/Roboto-Black.ttf

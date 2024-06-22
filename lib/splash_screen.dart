@@ -81,7 +81,8 @@ class SplashScreenState extends State<SplashScreen> {
             // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
-              builder: (context) => MainScreen(userData: responseData['user']),
+              // ignore: avoid_types_as_parameter_names
+              builder: (context) => MainScreen(userData: responseData['user'],onNavigateToPage: (int) { return 1; },),
             ),
           );
           if (kDebugMode) {
