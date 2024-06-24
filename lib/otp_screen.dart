@@ -47,7 +47,7 @@ class OTPScreenState extends State<OTPScreen> {
             context: context,
             type: QuickAlertType.success,
             text: 'Completed Registration!',
-            autoCloseDuration: const Duration(seconds: 2),
+            autoCloseDuration: const Duration(seconds: 200),
             showConfirmBtn: false,
           );
           Future.delayed(const Duration(seconds: 2), () {

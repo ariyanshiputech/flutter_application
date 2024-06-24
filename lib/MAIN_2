@@ -1,0 +1,190 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_application/splash_screen.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:quickalert/models/quickalert_type.dart';
+import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'aamarpay.dart'; // Make sure to import your Aamarpay widget file here
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Aamarpay Payment',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const PaymentForm(),
+    );
+  }
+}
+
+class PaymentForm extends StatefulWidget {
+  const PaymentForm({super.key});
+
+  @override
+  PaymentFormState createState() => PaymentFormState();
+}
+
+class PaymentFormState extends State<PaymentForm> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _amountController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _mobileController = TextEditingController();
+  final transactionID = "PAY${DateTime.now().millisecondsSinceEpoch}";
+  bool _isLoading = false;
+
+  void _startPayment() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Aamarpay(
+            isSandBox: true, // Change to false for production
+            successUrl: 'https://ariyanshipu.me/success',
+            failUrl: 'https://ariyanshipu.me/fail',
+            cancelUrl: 'https://ariyanshipu.me/cancel',
+            storeID: 'aamarpaytest',
+            transactionID: transactionID,
+            transactionAmountFromTextField: _amountController,
+            signature: 'dbb74894e82415a2f7ff0ec3a97e4183',
+            customerName: _nameController.text,
+            customerMobile: _mobileController.text,
+            status: (status, message) {
+              setState(() {
+                _isLoading = false;
+              });   
+              // ignore: unrelated_type_equality_checks
+              if(status.name == "success") {
+                QuickAlert.show(
+                  // ignore: use_build_context_synchronously
+                  context: context,
+                  type: QuickAlertType.success,
+                  text: transactionID,
+                  showConfirmBtn: true,
+                  barrierDismissible: false,
+                  onConfirmBtnTap: () {
+                        Navigator.pushReplacement(
+                      // ignore: use_build_context_synchronously
+                      context,
+                      MaterialPageRoute(
+                        // ignore: avoid_types_as_parameter_names
+                        builder: (context) => const SplashScreen(),
+                      ),
+                    ); // Close dialog and exit app
+                  },
+                );
+
+                
+              }else{
+                QuickAlert.show(
+                  // ignore: use_build_context_synchronously
+                  context: context,
+                  type: QuickAlertType.error,
+                  text: status.name,
+                  autoCloseDuration: const Duration(seconds: 2),
+                  showConfirmBtn: false,
+                );
+              }
+
+               
+             
+            }, child: const SpinKitSquareCircle(
+                color: Colors.red,
+                size: 50.0,
+              ),
+          ),
+        ),
+      ).then((_) {
+        setState(() {
+          _isLoading = false;
+        });
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Aamarpay Payment'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: <Widget>[
+              TextFormField(
+                controller: _amountController,
+                decoration: const InputDecoration(labelText: 'Amount'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter an amount';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your name';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _emailController,
+                decoration: const InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your email';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Please enter a valid email address';
+                  }
+                  return null;
+                },
+              ),
+              TextFormField(
+                controller: _mobileController,
+                decoration: const InputDecoration(labelText: 'Mobile Number'),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your mobile number';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 20),
+              _isLoading
+                  ? const Center(child: SpinKitSquareCircle(
+                      color: Colors.red,
+                      size: 50.0,
+                    ),)
+                  : ElevatedButton(
+                      onPressed: _startPayment,
+                      child: const Text('Pay Now'),
+                    ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

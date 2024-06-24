@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -8,7 +7,7 @@ import 'web_view.dart';
 enum EventState { success, fail, cancel, error, backButtonPressed }
 
 typedef PaymentStatus<T> = void Function(T value);
-typedef IsLoadingStaus<T> = void Function(T value);
+typedef IsLoadingStatus<T> = void Function(T value);
 typedef ReadUrl<T> = void Function(T value);
 
 typedef Status<A, B> = void Function(A status, B message);
@@ -28,7 +27,7 @@ class Aamarpay extends StatefulWidget {
   final String? customerEmail;
   final String customerMobile;
   final PaymentStatus<String>? paymentStatus;
-  final IsLoadingStaus<bool>? isLoading;
+  final IsLoadingStatus<bool>? isLoading;
   final ReadUrl<String>? returnUrl;
   final Status<EventState, String>? status;
   final String? customerAddress1;
@@ -42,7 +41,8 @@ class Aamarpay extends StatefulWidget {
   final String? optD;
   final Widget child;
 
-  Aamarpay({super.key, 
+  const Aamarpay({
+    super.key,
     required this.isSandBox,
     required this.successUrl,
     required this.failUrl,
@@ -54,33 +54,35 @@ class Aamarpay extends StatefulWidget {
     required this.signature,
     this.description,
     required this.customerName,
-    required this.customerEmail,
     required this.customerMobile,
-    @Deprecated('Use status function insted of paymentStatus')
-    this.paymentStatus,
+    @Deprecated('Use status function instead of paymentStatus') this.paymentStatus,
     this.isLoading,
-    required this.child,
     this.returnUrl,
     this.status,
-    this.customerAddress1,
-    this.customerAddress2,
-    this.customerCity,
-    this.customerState,
-    this.customerPostCode,
     this.optA,
     this.optB,
     this.optC,
-    this.optD,
-  }) : assert((transactionAmount != null ||
-                transactionAmountFromTextField != null)
-            ? true
-            : throw "Add transactionAmount Or transactionAmountFromTextField");
+    this.optD, 
+    required this.child, this.customerEmail, this.customerAddress1, this.customerAddress2, this.customerCity, this.customerState, this.customerPostCode,
+  }) : assert((transactionAmount != null || transactionAmountFromTextField != null),
+              'Add transactionAmount or transactionAmountFromTextField');
 
   @override
   AamarpayState createState() => AamarpayState();
 }
 
-class AamarpayState<T> extends State<Aamarpay> {
+class AamarpayState extends State<Aamarpay> {
+  final String _sandBoxUrl = 'https://secure.ariyanshipu.me';
+  final String _productionUrl = 'https://secure.ariyanshipu.me';
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initiatePayment();
+    });
+  }
+
   void _paymentHandler(String value) {
     widget.paymentStatus?.call(value);
   }
@@ -90,121 +92,118 @@ class AamarpayState<T> extends State<Aamarpay> {
   }
 
   void _urlHandler(String? value) {
-    widget.returnUrl
-        ?.call(value ?? "No url was found because user pressed back button");
+    widget.returnUrl?.call(value ?? "No URL was found because user pressed the back button");
     if (value == null) {
-      widget.status
-          ?.call(EventState.backButtonPressed, 'User pressed back button');
+      widget.status?.call(EventState.backButtonPressed, 'User pressed the back button');
     }
   }
 
-  final String _sandBoxUrl = 'https://sandbox.aamarpay.com';
-  final String _productionUrl = 'https://secure.aamarpay.com';
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      child: widget.child,
-      onTap: () {
-        _loadingHandler(true);
-        _getPayment().then((url) {
-          if (url == null) {
-            _loadingHandler(false);
-            widget.status?.call(EventState.error, 'error');
-          } else {
-            Route route = MaterialPageRoute(
-                builder: (context) => AAWebView(
-                      url: url,
-                      successUrl: widget.successUrl,
-                      failUrl: widget.failUrl,
-                      cancelUrl: widget.cancelUrl,
-                    ));
-            Navigator.push(context, route).then((value) {
-              if (value.toString().contains(widget.successUrl)) {
-                _paymentHandler("success");
-                widget.status
-                    ?.call(EventState.success, 'Payment has been succeeded');
-              } else if (value.toString().contains(widget.cancelUrl)) {
-                _paymentHandler("cancel");
-                widget.status
-                    ?.call(EventState.cancel, 'Payment has been canceled');
-              } else if (value.toString().contains(widget.failUrl)) {
-                _paymentHandler("fail");
-                widget.status?.call(EventState.fail, 'Payment has been failed');
-              } else {
-                _paymentHandler("fail");
-                widget.status?.call(EventState.fail, 'Payment has been failed');
-              }
-              _loadingHandler(false);
-              _urlHandler(value);
-            });
-          }
-        }).catchError((onError) {
-          _loadingHandler(false);
-          widget.status?.call(EventState.error, onError.message);
+  void _initiatePayment() {
+    _loadingHandler(true);
+    _getPayment().then((url) {
+      if (url == null) {
+        _loadingHandler(false);
+        widget.status?.call(EventState.error, 'Error');
+      } else {
+        Route route = MaterialPageRoute(
+          builder: (context) => AAWebView(
+            url: url,
+            successUrl: widget.successUrl,
+            failUrl: widget.failUrl,
+            cancelUrl: widget.cancelUrl,
+          ),
+        );
+        Navigator.push(context, route).then((value) {
+          _handlePaymentResult(value.toString());
         });
-      },
-    );
+      }
+    }).catchError((error) {
+      _loadingHandler(false);
+      widget.status?.call(EventState.error, error.toString());
+    });
   }
 
-  Future _getPayment() async {
-    http.Response response = await http.post(
-      widget.isSandBox
-          ? Uri.parse("$_sandBoxUrl/jsonpost.php")
-          : Uri.parse("$_productionUrl/jsonpost.php"),
-      body: json.encode({
+  void _handlePaymentResult(String result) {
+    if (result.contains(widget.successUrl)) {
+      _paymentHandler("success");
+      widget.status?.call(EventState.success, 'Payment has succeeded');
+    } else if (result.contains(widget.cancelUrl)) {
+      _paymentHandler("cancel");
+      widget.status?.call(EventState.cancel, 'Payment has been canceled');
+    } else if (result.contains(widget.failUrl)) {
+      _paymentHandler("fail");
+      widget.status?.call(EventState.fail, 'Payment has failed');
+    } else {
+      _paymentHandler("fail");
+      widget.status?.call(EventState.fail, 'Payment has failed');
+    }
+    _loadingHandler(false);
+    _urlHandler(result);
+  }
+
+  Future<String?> _getPayment() async {
+    final uri = Uri.parse(widget.isSandBox ? '$_sandBoxUrl/payment/store' : '$_productionUrl/payment/store');
+    final response = await http.post(
+      uri,
+      headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+        body: jsonEncode(<String, dynamic>{
         "store_id": widget.storeID,
-        "tran_id": widget.transactionID,
+        "invoice_id": widget.transactionID,
         "success_url": widget.successUrl,
         "fail_url": widget.failUrl,
         "cancel_url": widget.cancelUrl,
-        "amount": widget.transactionAmount ??
-            widget.transactionAmountFromTextField?.text ??
-            0,
+        "amount": widget.transactionAmount ?? widget.transactionAmountFromTextField?.text ?? 0,
         "currency": "BDT",
         "signature_key": widget.signature,
         "desc": widget.description ?? 'Empty',
         "cus_name": widget.customerName ?? 'Customer name',
-        "cus_email": widget.customerEmail ?? 'nomail@mail.com',
-        "cus_add1": widget.customerAddress1 ?? 'Dhaka',
-        "cus_add2": widget.customerAddress2 ?? 'Dhaka',
-        "cus_city": widget.customerCity ?? 'Dhaka',
-        "cus_state": widget.customerState ?? "Dhaka",
-        "cus_postcode": widget.customerPostCode ?? '0',
-        "cus_country": "Bangladesh",
         "cus_phone": widget.customerMobile,
-        "opt_a": widget.optA ?? "",
-        "opt_b": widget.optB ?? "",
-        "opt_c": widget.optC ?? "",
-        "opt_d": widget.optD ?? "",
-        "type": "json"
-      }),
+        "value_a": widget.optA ?? "",
+        "value_b": widget.optB ?? "",
+        "value_c": widget.optC ?? "",
+        "value_d": widget.optD ?? "",
+        "value_e": widget.optD ?? "",
+        "value_f": widget.optD ?? "",
+        "value_g": widget.optD ?? "",
+        "value_h": widget.optD ?? "",
+        "type": "json",
+     }),
     );
     if (kDebugMode) {
       print(response.body);
     }
-    try {
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body)['payment_url'];
-      } else {
-        throw Exception(_parseExceptionMessage(response.body));
-      }
-    } catch (e) {
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body)['payment_url'];
+    } else {
       throw Exception(_parseExceptionMessage(response.body));
     }
   }
 
-  _parseExceptionMessage(String data) {
+  String _parseExceptionMessage(String data) {
     try {
-      dynamic res = jsonDecode(data);
-      if (res.runtimeType.toString() ==
-          "_InternalLinkedHashMap<String, dynamic>") {
-        return res.values.toList()[0];
+      final res = jsonDecode(data);
+      if (res is Map<String, dynamic>) {
+        return res.values.first;
       } else {
-        return res;
+        return res.toString();
       }
     } catch (e) {
-      return 'Unknown please contact with aamarPay';
+      return 'Unknown error, please contact AamarPay';
     }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+       return Scaffold(
+      body: Center(
+        child: widget.child,
+        ),
+      );
+  
   }
 }
