@@ -1,13 +1,16 @@
+// ignore_for_file: avoid_types_as_parameter_names, use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/main_screen.dart';
-import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/welcome_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:android_id/android_id.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -73,16 +76,18 @@ class SplashScreenState extends State<SplashScreen> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
+
         if (responseData['success'] == true) {
+          GlobalData.userData = responseData['user'];
           setState(() {
             isVerified = true;
           });
           Navigator.pushReplacement(
-            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
-              // ignore: avoid_types_as_parameter_names
-              builder: (context) => MainScreen(userData: responseData['user'],onNavigateToPage: (int) { return 1; },),
+              builder: (context) => MainScreen(onNavigateToPage: (int) {
+                return 1;
+              }),
             ),
           );
           if (kDebugMode) {
@@ -93,7 +98,6 @@ class SplashScreenState extends State<SplashScreen> {
             isVerified = false;
           });
           Navigator.pushReplacement(
-            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
               builder: (context) => const WelcomeScreen(),
@@ -104,16 +108,15 @@ class SplashScreenState extends State<SplashScreen> {
           }
         }
       } else {
-         setState(() {
-            isVerified = false;
-          });
-          Navigator.pushReplacement(
-            // ignore: use_build_context_synchronously
-            context,
-            MaterialPageRoute(
-              builder: (context) => const WelcomeScreen(),
-            ),
-          );
+        setState(() {
+          isVerified = false;
+        });
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const WelcomeScreen(),
+          ),
+        );
         if (kDebugMode) {
           print('Request failed with status: ${response.statusCode}.');
         }
@@ -128,21 +131,23 @@ class SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TColors.tPrimaryColor, // Customize the background color
+      backgroundColor: Colors.white, // Customize the background color
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(TImages.darkAppLogo,
-                width: 150,
-                height: 150), // Ensure this path matches your splash image path
+            Image.asset(
+              TImages.darkAppLogo,
+              width: 150,
+              height: 150,
+            ), // Ensure this path matches your splash image path
             const SizedBox(height: 20),
-            const Text(
-              'Lalpool Wifi Zone',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+            SizedBox(
+              height: 100,
+              width: double.infinity,
+              child: Lottie.asset(
+                'assets/logos/loading.json',
+                repeat: false, // Set repeat to false to play only once
               ),
             ),
           ],

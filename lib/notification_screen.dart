@@ -2,16 +2,15 @@ import 'dart:async';
 
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 
 class NotificationScreen extends StatefulWidget {
-  final Map<dynamic, dynamic> userData;
   final Function(int) onNavigateToPage; // Callback function
 
   const NotificationScreen({
     super.key,
-    required this.userData,
     required this.onNavigateToPage,
   });
 
@@ -34,9 +33,9 @@ class NotificationScreenState extends State<NotificationScreen>
   @override
   Widget build(BuildContext context) {
     final successfulNotifications =
-        widget.userData['successfulNotifications'] ?? [];
+        GlobalData.userData?['successfulNotifications'] ?? [];
     final unsuccessfulNotifications =
-        widget.userData['unsuccessfulNotifications'] ?? [];
+        GlobalData.userData?['unsuccessfulNotifications'] ?? [];
 
     // ignore: deprecated_member_use
     return WillPopScope(

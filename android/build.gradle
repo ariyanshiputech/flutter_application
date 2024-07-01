@@ -6,7 +6,7 @@ allprojects {
 }
 
 buildscript {
-    ext.kotlin_version = '1.8.0' // Update to the version your dependencies need
+    ext.kotlin_version = '1.6.0' // Update to the version your dependencies need
     repositories {
         google()
         mavenCentral()

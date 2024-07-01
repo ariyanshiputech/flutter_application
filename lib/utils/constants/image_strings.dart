@@ -5,7 +5,7 @@
 class TImages {
 
   // -- App Logos
-  static const String darkAppLogo = "assets/logos/t-store-splash-logo-black.png";
+  static const String darkAppLogo = "assets/logos/logo-red.png";
   static const String lightAppLogo = "assets/logos/t-store-splash-logo-white.png";
 
   // -- Social Logos
@@ -34,6 +34,7 @@ class TImages {
   static const String hermanMillerLogo = "assets/icons/brands/herman-miller-logo.png";
   static const String ikeaLogo = "assets/icons/brands/ikea_logo.png";
   static const String acerlogo = "assets/icons/brands/acer_logo.png";
+  static const String buyHotsot = "assets/images/content/buy_hotspot.png";
 
   // -- Animations
   static const String productsIllustration = "assets/images/animations/sammy-line-workout.gif";

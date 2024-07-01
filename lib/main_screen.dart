@@ -3,15 +3,13 @@ import 'package:fancy_bottom_navigation_2/fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/home_screen.dart';
 import 'package:flutter_application/notification_screen.dart';
-import 'package:flutter_application/profile_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 
 class MainScreen extends StatefulWidget {
-  final Map<dynamic, dynamic> userData;
   final Function(int) onNavigateToPage;
 
-  const MainScreen({super.key, required this.userData, required this.onNavigateToPage});
+  const MainScreen({super.key, required this.onNavigateToPage});
 
   @override
   MainScreenState createState() => MainScreenState();
@@ -66,11 +64,12 @@ class MainScreenState extends State<MainScreen> {
   Widget _getPageContent(int page) {
     switch (page) {
       case 0:
-        return HomeScreen(userData: widget.userData, onNavigateToPage: updatePage);
+        return HomeScreen(onNavigateToPage: updatePage);
       case 1:
-        return ProfileScreen(userData: widget.userData, onNavigateToPage: updatePage);
+      return NotificationScreen(onNavigateToPage: updatePage);
+
       case 2:
-        return NotificationScreen(userData: widget.userData, onNavigateToPage: updatePage);
+        return NotificationScreen(onNavigateToPage: updatePage);
       default:
         return const Text('Invalid Page');
     }
