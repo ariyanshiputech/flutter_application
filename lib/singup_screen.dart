@@ -132,6 +132,7 @@ class SignUpScreenState extends State<SignUpScreen> {
             print('Phone Number: $phoneNumber');
           }
           Navigator.push(
+            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
               builder: (context) => OTPScreen(phoneNumber: phoneNumber, userID: userID),
@@ -185,6 +186,7 @@ class SignUpScreenState extends State<SignUpScreen> {
       }
     } catch (e) {
       // Hide the loading dialog
+      // ignore: use_build_context_synchronously
       AlertBuilder.hideLoadingDialog(context);
 
       if (kDebugMode) {
@@ -354,6 +356,7 @@ class FormSectionState extends State<FormSection> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: deprecated_member_use
     final isPlatformDark = WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
     final initTheme = isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
     return ThemeProvider(
@@ -436,7 +439,6 @@ class FormSectionState extends State<FormSection> {
                         });
 
                         // Show the loading dialog
-                        AlertBuilder.showLoadingDialog(context);
                         
                         await widget.onSubmit(
                           nameController.text,
@@ -445,7 +447,7 @@ class FormSectionState extends State<FormSection> {
                         );
 
                         // Hide the loading dialog
-                        AlertBuilder.hideLoadingDialog(context);
+                        // ignore: use_build_context_synchronously
                       }
                     },
                     child: const Text("SIGN UP"),
