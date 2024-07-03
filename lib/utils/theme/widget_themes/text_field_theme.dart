@@ -6,7 +6,7 @@ class TTextFormFieldTheme {
   TTextFormFieldTheme._();
 
   static InputDecorationTheme lightInputDecorationTheme = InputDecorationTheme(
-    errorMaxLines: 3,
+    errorMaxLines: 1,
     prefixIconColor: TColors.darkGrey,
     suffixIconColor: TColors.darkGrey,
     // constraints: const BoxConstraints.expand(height: TSizes.inputFieldHeight),
@@ -37,7 +37,7 @@ class TTextFormFieldTheme {
   );
 
   static InputDecorationTheme darkInputDecorationTheme = InputDecorationTheme(
-    errorMaxLines: 2,
+    errorMaxLines: 1,
     prefixIconColor: TColors.darkGrey,
     suffixIconColor: TColors.darkGrey,
     // constraints: const BoxConstraints.expand(height: TSizes.inputFieldHeight),

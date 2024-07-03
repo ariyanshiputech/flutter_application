@@ -39,7 +39,7 @@ class FormHeaderWidget extends StatelessWidget {
               Image(
                 image: AssetImage(image),
                 color: imageColor,
-                height: size.height * imageHeight,
+                height: 80,
               ),
               if (avatar != null) avatar!,
             ],

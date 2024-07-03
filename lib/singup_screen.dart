@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/otp_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
@@ -14,6 +16,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:flutter_application/form_header_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:android_id/android_id.dart';
+
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -28,7 +31,7 @@ class SignUpScreenState extends State<SignUpScreen> {
   String _phoneErrorMessage = '';
   String _nameErrorMessage = '';
   String _macAddressErrorMessage = '';
-  bool _isSubmitting = false; // Add a flag for loading state
+  bool _isSubmitting = false;
 
   @override
   void initState() {
@@ -120,7 +123,6 @@ class SignUpScreenState extends State<SignUpScreen> {
             print('Sign up successful');
             print('Phone Number: $phoneNumber');
           }
-          // Navigate to the OTP screen with the phone number
           Navigator.push(
             // ignore: use_build_context_synchronously
             context,
@@ -135,15 +137,46 @@ class SignUpScreenState extends State<SignUpScreen> {
           _nameErrorMessage = responseData['errors']?['name']?.first ?? '';
           _phoneErrorMessage = responseData['errors']?['phoneNo']?.first ?? '';
           _macAddressErrorMessage = responseData['errors']?['macAddress']?.first ?? '';
+
+          if (_nameErrorMessage.isNotEmpty && _phoneErrorMessage.isNotEmpty) {
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'Opps!',
+                message: '$_nameErrorMessage\n$_phoneErrorMessage',
+                contentType: ContentType.failure,
+              ),
+            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          }
+
+          if (_nameErrorMessage.isEmpty && _phoneErrorMessage.isEmpty && _macAddressErrorMessage.isNotEmpty) {
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'Oh Snap!',
+                message: _macAddressErrorMessage,
+                contentType: ContentType.failure,
+              ),
+            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          }
         });
+
         if (kDebugMode) {
           print('Failed to sign up. Status code: ${response.statusCode}');
           print('Response body: ${response.body}');
         }
       }
     } catch (e) {
-      setState(() {
-      });
       if (kDebugMode) {
         print('Error occurred while signing up: $e');
       }
@@ -156,96 +189,95 @@ class SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-     return Builder(
-        builder: (context) {
-          // ignore: deprecated_member_use
-      return SafeArea(
-        child: Scaffold(
-          body: SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.all(TSizes.tDefaultSize),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FormHeaderWidget(
-                    image: TImages.darkAppLogo,
-                    title: TTexts.tSignUpTitle,
-                    subTitle: TTexts.tSignUpSubTitle,
-                    imageHeight: 0.15,
-                    isAvatarPresent: true,
-                    avatar: _profileImage != null
-                        ? GestureDetector(
-                            onTap: _pickImage,
-                            child: Stack(
-                              children: [
-                                CircleAvatar(
-                                  radius: 50,
-                                  backgroundImage: FileImage(_profileImage!),
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(3),
-                                    decoration: const BoxDecoration(
-                                      color: TColors.tPrimaryColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.edit,
-                                      color: Colors.white,
+    return Builder(
+      builder: (context) {
+        return SafeArea(
+          child: Scaffold(
+            body: SingleChildScrollView(
+              child: Container(
+                padding: const EdgeInsets.all(TSizes.tDefaultSize),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FormHeaderWidget(
+                      image: TImages.darkAppLogo,
+                      title: TTexts.tSignUpTitle,
+                      subTitle: TTexts.tSignUpSubTitle,
+                      imageHeight: 0.15,
+                      isAvatarPresent: true,
+                      avatar: _profileImage != null
+                          ? GestureDetector(
+                              onTap: _pickImage,
+                              child: Stack(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 50,
+                                    backgroundImage: FileImage(_profileImage!),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: const BoxDecoration(
+                                        color: TColors.tPrimaryColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.edit,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : GestureDetector(
-                            onTap: _pickImage,
-                            child: Stack(
-                              children: [
-                                const CircleAvatar(
-                                  radius: 50,
-                                  backgroundImage: AssetImage(TImages.user),
-                                ),
-                                Positioned(
-                                  bottom: 0,
-                                  right: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(3),
-                                    decoration: const BoxDecoration(
-                                      color: TColors.tPrimaryColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.edit,
-                                      color: Colors.white,
+                                ],
+                              ),
+                            )
+                          : GestureDetector(
+                              onTap: _pickImage,
+                              child: Stack(
+                                children: [
+                                  const CircleAvatar(
+                                    radius: 50,
+                                    backgroundImage: AssetImage(TImages.user),
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: const BoxDecoration(
+                                        color: TColors.tPrimaryColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(
+                                        Icons.edit,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                  ),
-                  const SizedBox(height: TSizes.tFormHeight - 10),
-                  const SizedBox(height: 20),
-                  FormSection(
-                    deviceKeyController: _deviceKeyController,
-                    ipAddressController: _ipAddressController,
-                    onSubmit: _submitForm,
-                    nameErrorMessage: _nameErrorMessage,
-                    phoneErrorMessage: _phoneErrorMessage,
-                    macAddressErrorMessage: _macAddressErrorMessage,
-                    isSubmitting: _isSubmitting,
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: TSizes.tFormHeight - 10),
+                    const SizedBox(height: 20),
+                    FormSection(
+                      deviceKeyController: _deviceKeyController,
+                      ipAddressController: _ipAddressController,
+                      onSubmit: _submitForm,
+                      nameErrorMessage: _nameErrorMessage,
+                      phoneErrorMessage: _phoneErrorMessage,
+                      macAddressErrorMessage: _macAddressErrorMessage,
+                      isSubmitting: _isSubmitting,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-       },
-      );
+        );
+      },
+    );
   }
 }
 
@@ -256,7 +288,7 @@ class FormSection extends StatefulWidget {
   final String nameErrorMessage;
   final String phoneErrorMessage;
   final String macAddressErrorMessage;
-  final bool isSubmitting; // Add a flag for loading state
+  final bool isSubmitting;
 
   const FormSection({
     super.key,
@@ -293,7 +325,7 @@ class FormSectionState extends State<FormSection> {
   @override
   void didUpdateWidget(covariant FormSection oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (    widget.nameErrorMessage != oldWidget.nameErrorMessage) {
+    if (widget.nameErrorMessage != oldWidget.nameErrorMessage) {
       setState(() {
         nameError = widget.nameErrorMessage;
       });
@@ -312,126 +344,111 @@ class FormSectionState extends State<FormSection> {
 
   @override
   Widget build(BuildContext context) {
-    final isPlatformDark =
-        // ignore: deprecated_member_use
-        WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
-    final initTheme = isPlatformDark ?  TAppTheme.darkTheme : TAppTheme.lightTheme;
+    // ignore: deprecated_member_use
+    final isPlatformDark = WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+    final initTheme = isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
     return ThemeProvider(
       initTheme: initTheme,
       builder: (_, myTheme) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 30),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextFormField(
-              controller: nameController,
-              decoration: InputDecoration(
-                label: const Text("Name"),
-                prefixIcon: const Icon(Icons.person_outline_rounded),
-                border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-                borderSide: BorderSide(color: nameError != null ? Colors.red : Colors.grey),
-              ),
-              
-              ),
-              // Commenting out the local validation for name
-              // validator: (value) {
-              //   if (value == null || value.isEmpty) {
-              //     return 'Name is required';
-              //   }
-              //   return null;
-              // },
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: phoneNoController,
-              decoration: InputDecoration(
-                label: const Text("Phone No"),
-                prefixIcon: const Icon(Icons.phone),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 30),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: InputDecoration(
+                    label: const Text("Name"),
+                    prefixIcon: const Icon(Icons.person_outline_rounded),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide(color: nameError != null ? Colors.red : Colors.grey),
+                    ),
+                  ),
                 ),
-                errorText: phoneError,
-              ),
-              // Commenting out the local validation for phone number
-              // validator: (value) {
-              //   if (value == null || value.isEmpty) {
-              //     return 'Phone number is required';
-              //   }
-              //   return null;
-              // },
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: widget.deviceKeyController,
-              decoration: InputDecoration(
-                label: const Text("Device Key"),
-                prefixIcon: const Icon(Icons.device_hub),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                const SizedBox(height: 15),
+                TextFormField(
+                  controller: phoneNoController,
+                  decoration: InputDecoration(
+                    label: const Text("Phone No"),
+                    prefixIcon: const Icon(Icons.phone),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
                 ),
-                enabled: false,
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: widget.ipAddressController,
-              decoration: InputDecoration(
-                label: const Text("IP Address"),
-                prefixIcon: const Icon(Icons.device_thermostat_sharp),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                const SizedBox(height: 15),
+                TextFormField(
+                  controller: widget.deviceKeyController,
+                  decoration: InputDecoration(
+                    label: const Text("Device Key"),
+                    prefixIcon: const Icon(Icons.device_hub),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    enabled: false,
+                  ),
                 ),
-                enabled: false,
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: macAddressController,
-              decoration: InputDecoration(
-                label: const Text("Mac Address"),
-                prefixIcon: const Icon(Icons.security_outlined),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                const SizedBox(height: 15),
+                TextFormField(
+                  controller: widget.ipAddressController,
+                  decoration: InputDecoration(
+                    label: const Text("IP Address"),
+                    prefixIcon: const Icon(Icons.device_thermostat_sharp),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    enabled: false,
+                  ),
                 ),
-                errorText: macAddressError,
-              ),
-              // Commenting out the local validation for MAC address
-              // validator: (value) {
-              //   if (value == null || value.isEmpty) {
-              //     return 'Mac Address is required';
-              //   }
-              //   return null;
-              // },
+                const SizedBox(height: 15),
+                TextFormField(
+                  controller: macAddressController,
+                  decoration: InputDecoration(
+                    label: const Text("Mac Address"),
+                    prefixIcon: const Icon(Icons.security_outlined),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+  onPressed: () async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        nameError = null;
+        phoneError = null;
+        macAddressError = null;
+      });
+
+      // Show the loading dialog
+      AlertBuilder.showLoadingDialog(context);
+      
+      await widget.onSubmit(
+        nameController.text,
+        phoneNoController.text,
+        macAddressController.text,
+      );
+
+      // Hide the loading dialog
+      // ignore: use_build_context_synchronously
+      AlertBuilder.hideLoadingDialog(context);
+    }
+  },
+  child: const Text("SIGN UP"),
+),
+
+                ),
+              ],
             ),
-            const SizedBox(height: 30),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                  setState(() {
-                    nameError = null;
-                    phoneError = null;
-                    macAddressError = null;
-                  });
-                  await widget.onSubmit(
-                    nameController.text,
-                    phoneNoController.text,
-                    macAddressController.text,
-                  );
-                  }
-                },
-                child: const Text("SIGN UP"),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
-  });
   }
 }
