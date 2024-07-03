@@ -54,61 +54,14 @@ flutter:
 
   assets:
     - assets/logos/
-    - assets/icons/brands/
     - assets/images/content/
     - assets/images/banners/
-    - assets/images/reviews/
-    - assets/images/products/
-    - assets/icons/categories/
-    - assets/images/animations/
-    - assets/icons/payment_methods/
-    - assets/images/on_boarding_images/
 
   fonts:
     - family: Poppins
       fonts:
-        - asset: assets/fonts/Poppins-Light.ttf
-          weight: 300
         - asset: assets/fonts/Poppins-Regular.ttf
           weight: 400
-        - asset: assets/fonts/Poppins-Italic.ttf
-          weight: 400
-          style: italic
-        - asset: assets/fonts/Poppins-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Poppins-MediumItalic.ttf
-          weight: 500
-          style: italic
-        - asset: assets/fonts/Poppins-SemiBold.ttf
-          weight: 600
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 800
-    - family: Roboto
-      fonts:
-        - asset: assets/fonts/Roboto-Light.ttf
-          weight: 300
-        - asset: assets/fonts/Roboto-LightItalic.ttf
-          weight: 300
-          style: italic
-        - asset: assets/fonts/Roboto-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Roboto-Italic.ttf
-          weight: 400
-          style: italic
-        - asset: assets/fonts/Roboto-Medium.ttf
-          weight: 500
-        - asset: assets/fonts/Roboto-MediumItalic.ttf
-          weight: 500
-          style: italic
-        - asset: assets/fonts/Roboto-Bold.ttf
-          weight: 600
-        - asset: assets/fonts/Roboto-BoldItalic.ttf
-          weight: 600
-          style: italic
-        - asset: assets/fonts/Roboto-Black.ttf
-          weight: 800
-        - asset: assets/fonts/Roboto-BlackItalic.ttf
-          weight: 800
-          style: italic
-
-        
+    

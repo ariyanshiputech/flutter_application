@@ -6,14 +6,14 @@ allprojects {
 }
 
 buildscript {
-    ext.kotlin_version = '1.6.0' // Update to the version your dependencies need
+    ext.kotlin_version = '1.8.22' // Update to the version your dependencies need
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.2.2'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:8.0.2'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.22"
     }
 }
 

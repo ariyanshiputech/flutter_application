@@ -156,48 +156,11 @@ class SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeModelInheritedNotifier.of(context).theme;
-
-     return ThemeSwitchingArea(
-      child: Builder(
+     return Builder(
         builder: (context) {
           // ignore: deprecated_member_use
       return SafeArea(
         child: Scaffold(
-          appBar: AppBar(
-          automaticallyImplyLeading: false, // Hides the automatically added back button
-          actions: [
-            ThemeSwitcher(
-              clipper: const ThemeSwitcherCircleClipper(),
-              builder: (context) {
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: TColors.tPrimaryColor, // Background color
-                        borderRadius: BorderRadius.circular(50), // Border radius
-                      ),
-                      child: IconButton(
-                        icon: Icon(
-                          theme.brightness == Brightness.dark ? Icons.wb_sunny : Icons.nights_stay,
-                        ),
-                        onPressed: () {
-                          ThemeSwitcher.of(context).changeTheme(
-                            theme: theme.brightness == Brightness.light ? TAppTheme.darkTheme : TAppTheme.lightTheme,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                );
-
-              },
-            ),
-          ],
-          ),
           body: SingleChildScrollView(
             child: Container(
               padding: const EdgeInsets.all(TSizes.tDefaultSize),
@@ -282,8 +245,7 @@ class SignUpScreenState extends State<SignUpScreen> {
         ),
       );
        },
-      ),
-    );
+      );
   }
 }
 
@@ -373,8 +335,7 @@ class FormSectionState extends State<FormSection> {
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(color: nameError != null ? Colors.red : Colors.grey),
               ),
-              errorText: nameError,
-               
+              
               ),
               // Commenting out the local validation for name
               // validator: (value) {
