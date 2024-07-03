@@ -96,6 +96,10 @@ class SignUpScreenState extends State<SignUpScreen> {
         base64Image = base64Encode(imageBytes);
       }
 
+      // Show the loading dialog
+      // ignore: use_build_context_synchronously
+      AlertBuilder.showLoadingDialog(context);
+
       final response = await http.post(
         url,
         headers: <String, String>{
@@ -114,6 +118,10 @@ class SignUpScreenState extends State<SignUpScreen> {
         }),
       );
 
+      // Hide the loading dialog
+      // ignore: use_build_context_synchronously
+      AlertBuilder.hideLoadingDialog(context);
+
       if (response.statusCode == 201 || response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
@@ -124,7 +132,6 @@ class SignUpScreenState extends State<SignUpScreen> {
             print('Phone Number: $phoneNumber');
           }
           Navigator.push(
-            // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
               builder: (context) => OTPScreen(phoneNumber: phoneNumber, userID: userID),
@@ -177,6 +184,9 @@ class SignUpScreenState extends State<SignUpScreen> {
         }
       }
     } catch (e) {
+      // Hide the loading dialog
+      AlertBuilder.hideLoadingDialog(context);
+
       if (kDebugMode) {
         print('Error occurred while signing up: $e');
       }
@@ -344,7 +354,6 @@ class FormSectionState extends State<FormSection> {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: deprecated_member_use
     final isPlatformDark = WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
     final initTheme = isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
     return ThemeProvider(
@@ -418,31 +427,29 @@ class FormSectionState extends State<FormSection> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-  onPressed: () async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        nameError = null;
-        phoneError = null;
-        macAddressError = null;
-      });
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        setState(() {
+                          nameError = null;
+                          phoneError = null;
+                          macAddressError = null;
+                        });
 
-      // Show the loading dialog
-      AlertBuilder.showLoadingDialog(context);
-      
-      await widget.onSubmit(
-        nameController.text,
-        phoneNoController.text,
-        macAddressController.text,
-      );
+                        // Show the loading dialog
+                        AlertBuilder.showLoadingDialog(context);
+                        
+                        await widget.onSubmit(
+                          nameController.text,
+                          phoneNoController.text,
+                          macAddressController.text,
+                        );
 
-      // Hide the loading dialog
-      // ignore: use_build_context_synchronously
-      AlertBuilder.hideLoadingDialog(context);
-    }
-  },
-  child: const Text("SIGN UP"),
-),
-
+                        // Hide the loading dialog
+                        AlertBuilder.hideLoadingDialog(context);
+                      }
+                    },
+                    child: const Text("SIGN UP"),
+                  ),
                 ),
               ],
             ),

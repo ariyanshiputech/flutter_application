@@ -14,7 +14,7 @@ class AlertBuilder {
           child: AlertDialog(
             backgroundColor: Colors.transparent,
             content: Center(
-                  child: Container(
+              child: Container(
                     width: 150,
                     height: 150,
                     decoration: BoxDecoration(
@@ -24,7 +24,7 @@ class AlertBuilder {
                     child: Center(
                     child: Lottie.asset(
                           'assets/logos/round_loading.json',
-                          repeat: false, // Set repeat to false to play only once
+                          repeat: true, // Set repeat to false to play only once
                         ),
                     ),
                     ),
