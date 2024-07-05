@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/main_screen.dart';
 import 'package:flutter_application/utils/constants/sizes.dart';
@@ -26,6 +27,8 @@ class OTPScreenState extends State<OTPScreen> {
     final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/otp_verification');
 
     try {
+      AlertBuilder.showLoadingDialog(context);
+
       final response = await http.post(
         url,
          headers: <String, String>{
@@ -39,6 +42,9 @@ class OTPScreenState extends State<OTPScreen> {
           'otp': _otpCode,
         }),
       );
+
+      // ignore: use_build_context_synchronously
+      AlertBuilder.hideLoadingDialog(context);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
