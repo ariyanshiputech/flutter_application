@@ -67,11 +67,8 @@ class MainScreenState extends State<MainScreen> {
         return HomeScreen(onNavigateToPage: updatePage);
       case 1:
       return NotificationScreen(onNavigateToPage: updatePage);
-
-      case 2:
-        return NotificationScreen(onNavigateToPage: updatePage);
       default:
-        return const Text('Invalid Page');
+        return const Text('404 Page');
     }
   }
 }

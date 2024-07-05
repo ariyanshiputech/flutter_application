@@ -30,7 +30,6 @@ class SignUpScreenState extends State<SignUpScreen> {
   File? _profileImage;
   String _phoneErrorMessage = '';
   String _nameErrorMessage = '';
-  String _macAddressErrorMessage = '';
   bool _isSubmitting = false;
 
   @override
@@ -79,7 +78,7 @@ class SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  Future<void> _submitForm(String name, String phoneNo, String macAddress) async {
+  Future<void> _submitForm(String name, String phoneNo) async {
     setState(() {
       _isSubmitting = true;
     });
@@ -113,18 +112,17 @@ class SignUpScreenState extends State<SignUpScreen> {
           'phoneNo': phoneNo,
           'deviceKey': deviceKey,
           'ipAddress': ipAddress,
-          'macAddress': macAddress,
           if (base64Image != null) 'profileImage': base64Image,
         }),
       );
-
       // Hide the loading dialog
       // ignore: use_build_context_synchronously
-      AlertBuilder.hideLoadingDialog(context);
-
       if (response.statusCode == 201 || response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
+       // ignore: use_build_context_synchronously
+        AlertBuilder.hideLoadingDialog(context);
+
           final String phoneNumber = responseData['user']['phone'];
           final int userID = responseData['user']['id'];
           if (kDebugMode) {
@@ -140,20 +138,37 @@ class SignUpScreenState extends State<SignUpScreen> {
           );
         }
       } else {
+      // ignore: use_build_context_synchronously
+      AlertBuilder.hideLoadingDialog(context);
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         setState(() {
           _nameErrorMessage = responseData['errors']?['name']?.first ?? '';
           _phoneErrorMessage = responseData['errors']?['phoneNo']?.first ?? '';
-          _macAddressErrorMessage = responseData['errors']?['macAddress']?.first ?? '';
 
-          if (_nameErrorMessage.isNotEmpty && _phoneErrorMessage.isNotEmpty) {
+          if (_nameErrorMessage.isNotEmpty) {
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: '',
+                message: _nameErrorMessage,
+                contentType: ContentType.failure,
+              ),
+            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          }
+
+          if (_nameErrorMessage.isEmpty && _phoneErrorMessage.isNotEmpty) {
             final snackBar = SnackBar(
               elevation: 0,
               behavior: SnackBarBehavior.floating,
               backgroundColor: Colors.transparent,
               content: AwesomeSnackbarContent(
                 title: 'Opps!',
-                message: '$_nameErrorMessage\n$_phoneErrorMessage',
+                message: _phoneErrorMessage,
                 contentType: ContentType.failure,
               ),
             );
@@ -162,21 +177,7 @@ class SignUpScreenState extends State<SignUpScreen> {
               ..showSnackBar(snackBar);
           }
 
-          if (_nameErrorMessage.isEmpty && _phoneErrorMessage.isEmpty && _macAddressErrorMessage.isNotEmpty) {
-            final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Oh Snap!',
-                message: _macAddressErrorMessage,
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
-          }
+          
         });
 
         if (kDebugMode) {
@@ -279,7 +280,6 @@ class SignUpScreenState extends State<SignUpScreen> {
                       onSubmit: _submitForm,
                       nameErrorMessage: _nameErrorMessage,
                       phoneErrorMessage: _phoneErrorMessage,
-                      macAddressErrorMessage: _macAddressErrorMessage,
                       isSubmitting: _isSubmitting,
                     ),
                   ],
@@ -296,10 +296,9 @@ class SignUpScreenState extends State<SignUpScreen> {
 class FormSection extends StatefulWidget {
   final TextEditingController deviceKeyController;
   final TextEditingController ipAddressController;
-  final Future<void> Function(String, String, String) onSubmit;
+  final Future<void> Function(String, String) onSubmit;
   final String nameErrorMessage;
   final String phoneErrorMessage;
-  final String macAddressErrorMessage;
   final bool isSubmitting;
 
   const FormSection({
@@ -309,7 +308,6 @@ class FormSection extends StatefulWidget {
     required this.onSubmit,
     required this.nameErrorMessage,
     required this.phoneErrorMessage,
-    required this.macAddressErrorMessage,
     required this.isSubmitting,
   });
 
@@ -320,18 +318,15 @@ class FormSection extends StatefulWidget {
 class FormSectionState extends State<FormSection> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneNoController = TextEditingController();
-  final TextEditingController macAddressController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? nameError;
   String? phoneError;
-  String? macAddressError;
 
   @override
   void initState() {
     super.initState();
     nameError = widget.nameErrorMessage;
     phoneError = widget.phoneErrorMessage;
-    macAddressError = widget.macAddressErrorMessage;
   }
 
   @override
@@ -347,11 +342,7 @@ class FormSectionState extends State<FormSection> {
         phoneError = widget.phoneErrorMessage;
       });
     }
-    if (widget.macAddressErrorMessage != oldWidget.macAddressErrorMessage) {
-      setState(() {
-        macAddressError = widget.macAddressErrorMessage;
-      });
-    }
+    
   }
 
   @override
@@ -416,17 +407,7 @@ class FormSectionState extends State<FormSection> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                TextFormField(
-                  controller: macAddressController,
-                  decoration: InputDecoration(
-                    label: const Text("Mac Address"),
-                    prefixIcon: const Icon(Icons.security_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 15),
+                
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -435,7 +416,6 @@ class FormSectionState extends State<FormSection> {
                         setState(() {
                           nameError = null;
                           phoneError = null;
-                          macAddressError = null;
                         });
 
                         // Show the loading dialog
@@ -443,7 +423,6 @@ class FormSectionState extends State<FormSection> {
                         await widget.onSubmit(
                           nameController.text,
                           phoneNoController.text,
-                          macAddressController.text,
                         );
 
                         // Hide the loading dialog

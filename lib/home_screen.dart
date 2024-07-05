@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_application/global_data.dart';
-import 'package:flutter_application/payment.dart';
 import 'package:flutter_application/profile_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/constants/image_strings.dart';
@@ -13,6 +12,7 @@ import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
+import 'package:lottie/lottie.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(int) onNavigateToPage;
@@ -94,163 +94,147 @@ class HomeScreenState extends State<HomeScreen> {
           ],
           backgroundColor: TColors.tPrimaryColor, // Set AppBar background color to the theme's primary color
         ),
-        body: Container(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              const SizedBox(height: 8.0),
-              LayoutBuilder(
-                builder: (BuildContext context, BoxConstraints constraints) {
-                  return FittedBox(
-                    child: Center(
-                      child: CountdownTimer(
-                        endTime: endTime,
-                        widgetBuilder: (_, time) {
-                          if (time == null) {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _buildTimeBox(0, 'Days', TColors.tDaysColor),
-                                _buildTimeBox(0, 'Hours', TColors.tHoursColor),
-                                _buildTimeBox(0, 'Minutes', TColors.tMinutesColor),
-                                _buildTimeBox(0, 'Seconds', TColors.tSecondsColor),
-                              ],
-                            );
-                          } else {
-                            return Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _buildTimeBox(time.days, 'Days', TColors.tDaysColor),
-                                _buildTimeBox(time.hours, 'Hours', TColors.tHoursColor),
-                                _buildTimeBox(time.min, 'Minutes', TColors.tMinutesColor),
-                                _buildTimeBox(time.sec, 'Seconds', TColors.tSecondsColor),
-                              ],
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 8.0),
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8.0,
-                  mainAxisSpacing: 8.0,
-                  children: [
-                    _buildCustomImageButton(
-                      TImages.buyHotsot, // Path to your custom image
-                      'BUY HOTSPOT',
-                      () {  
-                        setState(() {
-                          _isPressed = !_isPressed;
-                        });
-                        if (kDebugMode) {
-                          print('Custom Image Button Pressed');
-                        }
-                      },
-                    ),
-                    _buildCustomImageButton(
-                      TImages.banner1, // Path to your custom image
-                      'CARD RECHARGE',
-                      () {
-                        setState(() {
-                          _isPressed = !_isPressed;
-                        });
-                        if (kDebugMode) {
-                          print('Custom Image Button Pressed');
-                        }
-                      },
-                    ),
-                    // Add more custom image buttons or other widgets here
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PaymentScreen(),
+        body: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                const SizedBox(height: 8.0),
+                LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    return FittedBox(
+                      child: Center(
+                        child: CountdownTimer(
+                          endTime: endTime,
+                          widgetBuilder: (_, time) {
+                            if (time == null) {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildTimeBox(0, 'Days', TColors.tDaysColor),
+                                  _buildTimeBox(0, 'Hours', TColors.tHoursColor),
+                                  _buildTimeBox(0, 'Minutes', TColors.tMinutesColor),
+                                  _buildTimeBox(0, 'Seconds', TColors.tSecondsColor),
+                                ],
+                              );
+                            } else {
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildTimeBox(time.days, 'Days', TColors.tDaysColor),
+                                  _buildTimeBox(time.hours, 'Hours', TColors.tHoursColor),
+                                  _buildTimeBox(time.min, 'Minutes', TColors.tMinutesColor),
+                                  _buildTimeBox(time.sec, 'Seconds', TColors.tSecondsColor),
+                                ],
+                              );
+                            }
+                          },
+                        ),
                       ),
                     );
                   },
-                  child: const Text(
-                    "SIGN UP",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                const SizedBox(height: 8.0),
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: _buildCustomImageButton(
+                              TImages.buyHotsot,
+                              () {
+                                setState(() {
+                                  _isPressed = !_isPressed;
+                                });
+                                if (kDebugMode) {
+                                  print('Custom Image Button Pressed');
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 25.0),
+                          Expanded(
+                            child: _buildCustomImageButton(
+                              TImages.cardRecharge,
+                              () {
+                                setState(() {
+                                  _isPressed = !_isPressed;
+                                });
+                                if (kDebugMode) {
+                                  print('Custom Image Button Pressed');
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16.0),
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12.0),
+                          border: Border.all(
+                            color: Colors.blue, // Set the border color here
+                            width: 1.0, // Optionally set the width of the border
+                          ),
+                        ),
+                        constraints: const BoxConstraints(minHeight: 300), // Set minimum height here
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Your Text Here', // Replace with your desired text
+                            ),
+                            const SizedBox(height: 10),
+                            GestureDetector(
+                              onTap: () {
+                                if (kDebugMode) {
+                                  print('Lottie Button Pressed');
+                                }
+                              },
+                              child: Lottie.asset(
+                                'assets/logos/connect.json',
+                                height: 250,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Add more rows of buttons if needed
+                    ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildCustomImageButton(String imagePath, String title, VoidCallback onPressed) {
+  Widget _buildCustomImageButton(String imagePath, VoidCallback onPressed) {
     return GestureDetector(
       onTap: onPressed,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              spreadRadius: 2,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              color: Colors.transparent, // Background color for the title
             ),
           ],
           border: Border.all(
-            color: Colors.transparent,
-            width: 2,
+            color: Colors.blue, // Set the border color to blue
+            width: 1, // Adjust the width of the border if needed
           ),
         ),
-        child: Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.asset(
-                imagePath,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: double.infinity,
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: TColors.tPrimaryColor.withOpacity(1.0), // Background color for the title
-                  borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(12.0),
-                  ),
-                ),
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ],
+        child: Image.asset(
+          imagePath,
+          fit: BoxFit.cover,
         ),
       ),
     );
@@ -281,7 +265,7 @@ class HomeScreenState extends State<HomeScreen> {
             style: const TextStyle(fontSize: 13),
           ),
           progressColor: color,
-          backgroundColor: time == null ? Colors.grey[200]! : color,
+          backgroundColor: time == null ? color : Colors.grey[200]!,
           circularStrokeCap: CircularStrokeCap.round,
         ),
       ),
