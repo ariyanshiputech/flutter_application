@@ -100,9 +100,7 @@ class ProfileScreenState extends State<ProfileScreen> {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(snackBar);
-          if (kDebugMode) {
-            print('Sign up successful');
-          }
+          
          
         }
       } else {

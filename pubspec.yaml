@@ -43,8 +43,7 @@ dependencies:
   flutter_countdown_timer: ^4.1.0
   percent_indicator: ^4.2.2
   lottie: ^2.7.0
-  intl_phone_field: ^3.2.0
-  sms_autofill: ^2.4.0
+  toast: ^0.3.0
 
 dev_dependencies:
   flutter_test:

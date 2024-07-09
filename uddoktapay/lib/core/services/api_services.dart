@@ -14,19 +14,33 @@ import 'package:uddoktapay/widget/custom_snackbar.dart';
 import '../../models/credentials.dart';
 
 class ApiServices {
-  static Future<Map<String, dynamic>> createPaymentRequest({
+  static Future<Map<dynamic, dynamic>> createPaymentRequest({
     UddoktapayCredentials? uddoktapayCredentials,
     required CustomerDetails customer,
     required String amount,
+    dynamic valueA,
+    dynamic valueB,
+    dynamic valueC,
+    dynamic valueD,
+    dynamic valueE,
+    dynamic valueF,
+    dynamic valueG,
     Map? metadata,
     String? webhookUrl,
     required BuildContext context,
   }) async {
-    final Map<String, dynamic> requestData = {
+    final Map<dynamic, dynamic> requestData = {
       'cus_name': customer.fullName,
       'cus_phone': customer.cusPhone,
       'invoice_id': 'PAY${DateTime.now().millisecondsSinceEpoch}',
       'amount': amount,
+      'value_a': valueA,
+      'value_b': valueB,
+      'value_c': valueC,
+      'value_d': valueD,
+      'value_e': valueE,
+      'value_f': valueF,
+      'value_g': valueG,
       'success_url': AppConfig.redirectURL,
       'cancel_url': AppConfig.cancelURL,
       'type': 'GET',
@@ -52,9 +66,6 @@ class ApiServices {
         headers: <String, String>{
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'RT-UDDOKTAPAY-API-KEY': uddoktapayCredentials == null
-              ? AppConfig.sandboxAPIKey
-              : uddoktapayCredentials.apiKey,
         },
         body: jsonEncode(requestData),
       );

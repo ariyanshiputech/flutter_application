@@ -80,8 +80,8 @@ class BuyHotspotScreenState extends State<BuyHotspotScreen> {
     setState(() {
       ipAddress = ip ?? 'Unknown IP Address';
     });
-    try {
       AlertBuilder.showLoadingDialog(context);
+    try {
       final response = await http.post(
         url,
         headers: <String, String>{
@@ -104,28 +104,13 @@ class BuyHotspotScreenState extends State<BuyHotspotScreen> {
           // Optionally update other state variables based on the fetched data
         });
 
-        // final snackBar = SnackBar(
-        //       elevation: 0,
-        //       behavior: SnackBarBehavior.floating,
-        //       backgroundColor: Colors.transparent,
-        //       content: AwesomeSnackbarContent(
-        //         title: 'Yeah!',
-        //         message: responseData['message'],
-        //         contentType: ContentType.success,
-        //       ),
-        //     );
-        //     // ignore: use_build_context_synchronously
-        //     ScaffoldMessenger.of(context)
-        //       ..hideCurrentSnackBar()
-        //       ..showSnackBar(snackBar);
-
         if (kDebugMode) {
           print('Data fetched successfully');
           print('Response body: ${response.body}');
         }
       } else {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
         AlertBuilder.hideLoadingDialog(context);
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
         final snackBar = SnackBar(
               elevation: 0,
               behavior: SnackBarBehavior.floating,
@@ -267,6 +252,82 @@ class FormSectionState extends State<FormSection> {
         WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
     final initTheme = isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
 
+void proccessPayment(dynamic data) async {
+  final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/proccess_online_hotspot');
+  
+  try {
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: jsonEncode(<dynamic, dynamic>{
+        'invoice_id': data.invoiceId,
+        'reseller_id': GlobalData.userData?['reseller_id'],
+        'user_id': GlobalData.userData?['id'],
+        'device_key': data.valueA,
+        'amount': data.amount,
+        'hotspot_sell_price': data.valueD,
+        'validity': data.valueG,
+        'mac_address': data.valueC,
+      }),
+    );
+
+    final responseData = jsonDecode(response.body);
+    
+    if (response.statusCode == 200) {
+      // Show success message
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'Success!',
+          message: responseData['message'],
+          contentType: ContentType.success,
+        ),
+      );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
+    } else {
+      // Show failure message
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'Failed!',
+          message: responseData['message'],
+          contentType: ContentType.failure,
+        ),
+      );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
+    }
+  } catch (e) {
+    final snackBar = SnackBar(
+      elevation: 0,
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.transparent,
+      content: AwesomeSnackbarContent(
+        title: 'Error!',
+        message: 'An error occurred: $e',
+        contentType: ContentType.failure,
+      ),
+    );
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(snackBar);
+
+    if (kDebugMode) {
+      print('Error occurred while processing payment: $e');
+    }
+  }
+}
+
     return Center(
       child: ThemeProvider(
         initTheme: initTheme,
@@ -334,7 +395,7 @@ class FormSectionState extends State<FormSection> {
                   const SizedBox(height: 15),
                   TextFormField(
                     controller: widget.amountController,
-                    enabled: false,
+                    readOnly: true,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                       labelText: "Amount",
@@ -360,26 +421,55 @@ class FormSectionState extends State<FormSection> {
                                 cusPhone: GlobalData.userData?['phone'],
                               ),
                               amount: widget.amountController.text,
+                              valueA: GlobalData.userData?['device_key'],
+                              valueB: widget.ipAddressController.text,
+                              valueC: widget.macController.text,
+                              valueD: GlobalData.resellerData?['hotspot_sell_price'],
+                              valueE: GlobalData.userData?['reseller_id'],
+                              valueF: GlobalData.userData?['id'],
+                              valueG: widget.validityController.text,
                             );
                             AlertBuilder.hideLoadingDialog(context);
 
                             if (response.status == ResponseStatus.completed) {
-                              snackBar(
-                                  'Success. TRX_ID ${response.invoiceId}',
-                                  context);
+                              proccessPayment(response);
                             } else if (response.status ==
                                 ResponseStatus.canceled) {
-                              snackBar('Payment Canceled', context);
+                                  final snackBar = SnackBar(
+                                        elevation: 0,
+                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: Colors.transparent,
+                                        content: AwesomeSnackbarContent(
+                                          title: 'Opps!',
+                                          message: 'Payment Canceled',
+                                          contentType: ContentType.failure,
+                                        ),
+                                      );
+                                      ScaffoldMessenger.of(context)
+                                        ..hideCurrentSnackBar()
+                                        ..showSnackBar(snackBar);
                             } else if (response.status ==
                                 ResponseStatus.pending) {
-                              snackBar('Payment Pending', context);
+                              final snackBar = SnackBar(
+                                        elevation: 0,
+                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: Colors.transparent,
+                                        content: AwesomeSnackbarContent(
+                                          title: 'Opps!',
+                                          message: 'Payment Pending',
+                                          contentType: ContentType.failure,
+                                        ),
+                                      );
+                                      ScaffoldMessenger.of(context)
+                                        ..hideCurrentSnackBar()
+                                        ..showSnackBar(snackBar);
                             }
                           } catch (e) {
                             snackBar('An error occurred: $e', context);
                           }
                         }
                        } : null, // Disable button if isPaymentEnabled is false
-                      child: const Text("PAYMENT"),
+                      child: const Text("PAYMENT NOW"),
                     ),
                   ),
                 ],

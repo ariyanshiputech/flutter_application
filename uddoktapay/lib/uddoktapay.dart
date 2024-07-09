@@ -17,12 +17,26 @@ class UddoktaPay {
     required CustomerDetails customer,
     UddoktapayCredentials? credentials,
     required String amount,
+    dynamic valueA,
+    dynamic valueB,
+    dynamic valueC,
+    dynamic valueD,
+    dynamic valueE,
+    dynamic valueF,
+    dynamic valueG,
   }) async {
     final controller = Get.put(PaymentController());
 
     final request = await ApiServices.createPaymentRequest(
       customer: customer,
       amount: amount,
+      valueA: valueA,
+      valueB: valueB,
+      valueC: valueC,
+      valueD: valueD,
+      valueE: valueE,
+      valueF: valueF,
+      valueG: valueG,
       context: context,
     );
 

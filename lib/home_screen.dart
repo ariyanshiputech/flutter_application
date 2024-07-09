@@ -1,8 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/buyhotspot.dart';
 import 'package:flutter_application/card_recharge.dart';
 import 'package:flutter_application/global_data.dart';
@@ -12,10 +16,13 @@ import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/utils/constants/translate.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:lottie/lottie.dart';
+import 'package:toast/toast.dart';
+import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   final Function(int) onNavigateToPage;
@@ -31,15 +38,21 @@ class HomeScreenState extends State<HomeScreen> {
   GlobalKey bottomNavigationKey = GlobalKey();
   int endTime = DateTime.parse(GlobalData.userData?['expire_date']).millisecondsSinceEpoch;
   bool _isPressed = false;
+  bool lottieAnimate = false;
+  String? ipAddress;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+    _getIPAddress();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = ThemeModelInheritedNotifier.of(context).theme;
-
-    // Get the base64 encoded image string from userData
+    ToastContext().init(context);
     String? base64Image = GlobalData.userData?['profile'];
-
-    // Decode the base64 string to bytes, or use null if it's not available
     Uint8List? decodedBytes;
     if (base64Image != null && base64Image.isNotEmpty) {
       decodedBytes = base64Decode(base64Image);
@@ -153,12 +166,12 @@ class HomeScreenState extends State<HomeScreen> {
                                   _isPressed = !_isPressed;
                                 });
 
-                                 Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const BuyHotspotScreen(),
-                                    ),
-                                  );
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const BuyHotspotScreen(),
+                                  ),
+                                );
 
                                 if (kDebugMode) {
                                   print('Buy HotSpot Button Press');
@@ -176,11 +189,11 @@ class HomeScreenState extends State<HomeScreen> {
                                 });
 
                                 Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const CardRechargeScreen(),
-                                    ),
-                                  );
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const CardRechargeScreen(),
+                                  ),
+                                );
 
                                 if (kDebugMode) {
                                   print('Custom Image Button Pressed');
@@ -206,25 +219,30 @@ class HomeScreenState extends State<HomeScreen> {
                           children: [
                             const SizedBox(height: 8.0),
                             const Text(
-                               textAlign: TextAlign.center,
-                              'মেয়াদ থাকার পরেও ওয়াইপাই না চললে\nনিচের বাটনে চাপ দিন।',
-                               style: TextStyle(
-                                  fontFamily: 'Bangla',
-                                  fontSize: 16.0, // Adjust the font size as needed
-                                  fontWeight: FontWeight.bold,
-                                ),
-
+                              'মেয়াদ থাকার পরেও ওয়াইপাই না চললে\nনিচের বাটনে চাপ দিন।',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'Bangla',
+                                fontSize: 16.0, // Adjust the font size as needed
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             const SizedBox(height: 10),
                             GestureDetector(
                               onTap: () {
+                                setState(() {
+                                  lottieAnimate = true;
+                                });
+                                _connectWifi();
                                 if (kDebugMode) {
                                   print('Lottie Button Pressed');
                                 }
                               },
                               child: Lottie.asset(
                                 'assets/logos/connect.json',
-                                height: 250,
+                                height: 200,
+                                animate: lottieAnimate,
+                                repeat: true
                               ),
                             ),
                           ],
@@ -240,6 +258,173 @@ class HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+Future<void> _fetchData() async {
+    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/get_info');
+    final NetworkInfo networkInfo = NetworkInfo();
+    String? ip = await networkInfo.getWifiIP();
+    setState(() {
+      ipAddress = ip ?? 'Unknown IP Address';
+    });
+      AlertBuilder.showLoadingDialog(context);
+    try {
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Access-Control-Allow-Origin': '*',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'ipAddress': ipAddress,
+          'reseller_id' : GlobalData.userData?['reseller_id'],
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        AlertBuilder.hideLoadingDialog(context);
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        // Handle the fetched data as needed
+        setState(() {
+          GlobalData.resellerData = responseData;
+          // Optionally update other state variables based on the fetched data
+        });
+
+        if (kDebugMode) {
+          print('Data fetched successfully');
+          print('Response body: ${response.body}');
+        }
+      } else {
+        AlertBuilder.hideLoadingDialog(context);
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'Opps!',
+                message: responseData['message'],
+                contentType: ContentType.failure,
+              ),
+            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+        if (kDebugMode) {
+          print('Failed to fetch data. Status code: ${response.statusCode}');
+          print('Response body: ${response.body}');
+        }
+      }
+    } catch (e) {
+        AlertBuilder.hideLoadingDialog(context);
+      if (kDebugMode) {
+        print('Error occurred while fetching data: $e');
+      }
+    }
+  }
+
+  Future<void> _getIPAddress() async {
+    final NetworkInfo networkInfo = NetworkInfo();
+    String? ip = await networkInfo.getWifiIP();
+    setState(() {
+      ipAddress = ip ?? 'Unknown IP Address';
+    });
+  }
+
+  Future<void> _connectWifi() async {
+    final deviceKey = GlobalData.userData?['device_key'];
+    final resellerId = GlobalData.userData?['reseller_id'];
+    final userId = GlobalData.userData?['id'];
+
+    if (ipAddress != null && deviceKey != null && resellerId != null && userId != null) {
+      setState(() {
+        lottieAnimate = true;
+      });
+
+      final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/connect_wifi');
+      if (kDebugMode) {
+        print(GlobalData.userData?['device_key']);
+        print(GlobalData.userData?['reseller_id']);
+        print(GlobalData.userData?['id']);
+        print(GlobalData.userData?['hotspot_mikrotik']);
+        print(GlobalData.userData?['mac_address']);
+      }
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'device_key': GlobalData.userData?['device_key'],
+          'reseller_id':  GlobalData.userData?['reseller_id'],
+          'user_id': GlobalData.userData?['id'],
+          'hotspot_mikrotik': GlobalData.resellerData?['hotspot_mikrotik'],
+          'mac_address': GlobalData.resellerData?['mac_address'],
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          lottieAnimate = false;
+        });
+
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'Yeah!',
+                message: responseData['message'],
+                contentType: ContentType.success,
+              ),
+            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+       
+      } else {
+        setState(() {
+          lottieAnimate = false;
+        });
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (kDebugMode) {
+          print(responseData);
+        }
+       final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'Opps!',
+                message: responseData['message'],
+                contentType: ContentType.failure,
+              ),
+            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+      }
+    } else {
+      setState(() {
+        lottieAnimate = false;
+      });
+
+      final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'Opps!',
+                message: 'Missing required information.',
+                contentType: ContentType.failure,
+              ),
+            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+      
+    }
   }
 
   Widget _buildCustomImageButton(String imagePath, VoidCallback onPressed) {
@@ -266,37 +451,39 @@ class HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-Widget _buildTimeBox(int? time, String label, Color color) {
-  double percent = 1.0;
-  if (label == 'দিন') {
-    percent = time! / 365;
-  } else if (label == 'ঘন্টা') {
-    percent = time! / 24;
-  } else if (label == 'মিনিট') {
-    percent = time! / 60;
-  } else if (label == 'সেকেন্ড') {
-    percent = time! / 60;
+
+  Widget _buildTimeBox(int? time, String label, Color color) {
+    double percent = 1.0;
+    if (label == 'দিন') {
+      percent = time! / 365;
+    } else if (label == 'ঘন্টা') {
+      percent = time! / 24;
+    } else if (label == 'মিনিট') {
+      percent = time! / 60;
+    } else if (label == 'সেকেন্ড') {
+      percent = time! / 60;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CircularPercentIndicator(
+          radius: 40.0,
+          lineWidth: 5.0,
+          percent: percent,
+          center: Text(
+            time == 0 ? '০০\n$label' : '${Translate.convertToBangla(time!)}\n$label',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Bangla'),
+          ),
+          progressColor: color,
+          backgroundColor: time == 0 ? color : Colors.grey[200]!,
+          circularStrokeCap: CircularStrokeCap.round,
+        ),
+      ),
+    );
   }
 
-  return Center(
-    child: Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: CircularPercentIndicator(
-        radius: 40.0,
-        lineWidth: 5.0,
-        percent: percent,
-        center: Text(
-          time == 0 ? '০০\n$label' : '${Translate.convertToBangla(time!)}\n$label',
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Bangla'),
-        ),
-        progressColor: color,
-        backgroundColor: time == 0 ? color : Colors.grey[200]!,
-        circularStrokeCap: CircularStrokeCap.round,
-      ),
-    ),
-  );
-}
   Future<bool> _onWillPop() async {
     final result = await QuickAlert.show(
       context: context,
@@ -315,5 +502,3 @@ Widget _buildTimeBox(int? time, String label, Color color) {
     return result ?? false;
   }
 }
-
-
