@@ -24,6 +24,7 @@ dependencies:
   http: ^1.2.0
   webview_flutter: ^2.0.13
   get: ^4.6.6
+  lottie: ^2.7.0
 
 dev_dependencies:
   flutter_test:

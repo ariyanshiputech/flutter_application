@@ -58,7 +58,7 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> verifyUser(String deviceKey) async {
-    var url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/check_user');
+    var url = Uri.http('lalpoolnetwork.net', '/api/v2/apps/check_user');
     try {
       var response = await http.post(
         url,

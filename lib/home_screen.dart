@@ -3,10 +3,13 @@ import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_application/buyhotspot.dart';
+import 'package:flutter_application/card_recharge.dart';
 import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/profile_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/constants/image_strings.dart';
+import 'package:flutter_application/utils/constants/translate.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -111,20 +114,20 @@ class HomeScreenState extends State<HomeScreen> {
                               return Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  _buildTimeBox(0, 'Days', TColors.tDaysColor),
-                                  _buildTimeBox(0, 'Hours', TColors.tHoursColor),
-                                  _buildTimeBox(0, 'Minutes', TColors.tMinutesColor),
-                                  _buildTimeBox(0, 'Seconds', TColors.tSecondsColor),
+                                  _buildTimeBox(0, 'দিন', TColors.tDaysColor),
+                                  _buildTimeBox(0, 'ঘন্টা', TColors.tHoursColor),
+                                  _buildTimeBox(0, 'মিনিট', TColors.tMinutesColor),
+                                  _buildTimeBox(0, 'সেকেন্ড', TColors.tSecondsColor),
                                 ],
                               );
                             } else {
                               return Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  _buildTimeBox(time.days, 'Days', TColors.tDaysColor),
-                                  _buildTimeBox(time.hours, 'Hours', TColors.tHoursColor),
-                                  _buildTimeBox(time.min, 'Minutes', TColors.tMinutesColor),
-                                  _buildTimeBox(time.sec, 'Seconds', TColors.tSecondsColor),
+                                  _buildTimeBox(time.days, 'দিন', TColors.tDaysColor),
+                                  _buildTimeBox(time.hours, 'ঘন্টা', TColors.tHoursColor),
+                                  _buildTimeBox(time.min, 'মিনিট', TColors.tMinutesColor),
+                                  _buildTimeBox(time.sec, 'সেকেন্ড', TColors.tSecondsColor),
                                 ],
                               );
                             }
@@ -149,8 +152,16 @@ class HomeScreenState extends State<HomeScreen> {
                                 setState(() {
                                   _isPressed = !_isPressed;
                                 });
+
+                                 Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const BuyHotspotScreen(),
+                                    ),
+                                  );
+
                                 if (kDebugMode) {
-                                  print('Custom Image Button Pressed');
+                                  print('Buy HotSpot Button Press');
                                 }
                               },
                             ),
@@ -163,6 +174,14 @@ class HomeScreenState extends State<HomeScreen> {
                                 setState(() {
                                   _isPressed = !_isPressed;
                                 });
+
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const CardRechargeScreen(),
+                                    ),
+                                  );
+
                                 if (kDebugMode) {
                                   print('Custom Image Button Pressed');
                                 }
@@ -185,8 +204,16 @@ class HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            const SizedBox(height: 8.0),
                             const Text(
-                              'Your Text Here', // Replace with your desired text
+                               textAlign: TextAlign.center,
+                              'মেয়াদ থাকার পরেও ওয়াইপাই না চললে\nনিচের বাটনে চাপ দিন।',
+                               style: TextStyle(
+                                  fontFamily: 'Bangla',
+                                  fontSize: 16.0, // Adjust the font size as needed
+                                  fontWeight: FontWeight.bold,
+                                ),
+
                             ),
                             const SizedBox(height: 10),
                             GestureDetector(
@@ -239,39 +266,37 @@ class HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  Widget _buildTimeBox(int? time, String label, Color color) {
-    double percent = 1.0;
-    if (label == 'Days') {
-      percent = time! / 365;
-    } else if (label == 'Hours') {
-      percent = time! / 24;
-    } else if (label == 'Minutes') {
-      percent = time! / 60;
-    } else if (label == 'Seconds') {
-      percent = time! / 60;
-    }
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CircularPercentIndicator(
-          radius: 40.0,
-          lineWidth: 5.0,
-          percent: percent,
-          center: Text(
-            time == 0 ? '00\n$label' : '$time\n$label',
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13),
-          ),
-          progressColor: color,
-          backgroundColor: time == null ? color : Colors.grey[200]!,
-          circularStrokeCap: CircularStrokeCap.round,
-        ),
-      ),
-    );
+Widget _buildTimeBox(int? time, String label, Color color) {
+  double percent = 1.0;
+  if (label == 'দিন') {
+    percent = time! / 365;
+  } else if (label == 'ঘন্টা') {
+    percent = time! / 24;
+  } else if (label == 'মিনিট') {
+    percent = time! / 60;
+  } else if (label == 'সেকেন্ড') {
+    percent = time! / 60;
   }
 
+  return Center(
+    child: Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: CircularPercentIndicator(
+        radius: 40.0,
+        lineWidth: 5.0,
+        percent: percent,
+        center: Text(
+          time == 0 ? '০০\n$label' : '${Translate.convertToBangla(time!)}\n$label',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Bangla'),
+        ),
+        progressColor: color,
+        backgroundColor: time == 0 ? color : Colors.grey[200]!,
+        circularStrokeCap: CircularStrokeCap.round,
+      ),
+    ),
+  );
+}
   Future<bool> _onWillPop() async {
     final result = await QuickAlert.show(
       context: context,
@@ -290,3 +315,5 @@ class HomeScreenState extends State<HomeScreen> {
     return result ?? false;
   }
 }
+
+

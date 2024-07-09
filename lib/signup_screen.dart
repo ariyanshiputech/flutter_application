@@ -12,6 +12,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/utils/constants/sizes.dart';
 import 'package:flutter_application/utils/constants/text_strings.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:flutter_application/form_header_widget.dart';
 import 'package:image_picker/image_picker.dart';
@@ -104,8 +105,6 @@ class SignUpScreenState extends State<SignUpScreen> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
         body: jsonEncode(<String, String>{
           'name': name,
@@ -120,8 +119,8 @@ class SignUpScreenState extends State<SignUpScreen> {
       if (response.statusCode == 201 || response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-       // ignore: use_build_context_synchronously
-        AlertBuilder.hideLoadingDialog(context);
+          // ignore: use_build_context_synchronously
+          AlertBuilder.hideLoadingDialog(context);
 
           final String phoneNumber = responseData['user']['phone'];
           final int userID = responseData['user']['id'];
@@ -138,12 +137,28 @@ class SignUpScreenState extends State<SignUpScreen> {
           );
         }
       } else {
-      // ignore: use_build_context_synchronously
-      AlertBuilder.hideLoadingDialog(context);
+        // ignore: use_build_context_synchronously
+        AlertBuilder.hideLoadingDialog(context);
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         setState(() {
           _nameErrorMessage = responseData['errors']?['name']?.first ?? '';
           _phoneErrorMessage = responseData['errors']?['phoneNo']?.first ?? '';
+
+          if (responseData.containsKey('message')) {
+            final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'Opps!',
+                message: responseData['message'],
+                contentType: ContentType.failure,
+              ),
+            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          }
 
           if (_nameErrorMessage.isNotEmpty) {
             final snackBar = SnackBar(
@@ -176,8 +191,6 @@ class SignUpScreenState extends State<SignUpScreen> {
               ..hideCurrentSnackBar()
               ..showSnackBar(snackBar);
           }
-
-          
         });
 
         if (kDebugMode) {
@@ -206,83 +219,85 @@ class SignUpScreenState extends State<SignUpScreen> {
       builder: (context) {
         return SafeArea(
           child: Scaffold(
-            body: SingleChildScrollView(
-              child: Container(
-                padding: const EdgeInsets.all(TSizes.tDefaultSize),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FormHeaderWidget(
-                      image: TImages.darkAppLogo,
-                      title: TTexts.tSignUpTitle,
-                      subTitle: TTexts.tSignUpSubTitle,
-                      imageHeight: 0.15,
-                      isAvatarPresent: true,
-                      avatar: _profileImage != null
-                          ? GestureDetector(
-                              onTap: _pickImage,
-                              child: Stack(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 50,
-                                    backgroundImage: FileImage(_profileImage!),
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(3),
-                                      decoration: const BoxDecoration(
-                                        color: TColors.tPrimaryColor,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.edit,
-                                        color: Colors.white,
+            body: Center(
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(TSizes.tDefaultSize),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FormHeaderWidget(
+                        image: TImages.darkAppLogo,
+                        title: TTexts.tSignUpTitle,
+                        subTitle: TTexts.tSignUpSubTitle,
+                        imageHeight: 0.15,
+                        isAvatarPresent: true,
+                        avatar: _profileImage != null
+                            ? GestureDetector(
+                                onTap: _pickImage,
+                                child: Stack(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 50,
+                                      backgroundImage: FileImage(_profileImage!),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: const BoxDecoration(
+                                          color: TColors.tPrimaryColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.edit,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : GestureDetector(
-                              onTap: _pickImage,
-                              child: Stack(
-                                children: [
-                                  const CircleAvatar(
-                                    radius: 50,
-                                    backgroundImage: AssetImage(TImages.user),
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(3),
-                                      decoration: const BoxDecoration(
-                                        color: TColors.tPrimaryColor,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.edit,
-                                        color: Colors.white,
+                                  ],
+                                ),
+                              )
+                            : GestureDetector(
+                                onTap: _pickImage,
+                                child: Stack(
+                                  children: [
+                                    const CircleAvatar(
+                                      radius: 50,
+                                      backgroundImage: AssetImage(TImages.user),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: const BoxDecoration(
+                                          color: TColors.tPrimaryColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.edit,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                    ),
-                    const SizedBox(height: TSizes.tFormHeight - 10),
-                    const SizedBox(height: 20),
-                    FormSection(
-                      deviceKeyController: _deviceKeyController,
-                      ipAddressController: _ipAddressController,
-                      onSubmit: _submitForm,
-                      nameErrorMessage: _nameErrorMessage,
-                      phoneErrorMessage: _phoneErrorMessage,
-                      isSubmitting: _isSubmitting,
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: TSizes.tFormHeight - 10),
+                      const SizedBox(height: 20),
+                      FormSection(
+                        deviceKeyController: _deviceKeyController,
+                        ipAddressController: _ipAddressController,
+                        onSubmit: _submitForm,
+                        nameErrorMessage: _nameErrorMessage,
+                        phoneErrorMessage: _phoneErrorMessage,
+                        isSubmitting: _isSubmitting,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -321,6 +336,7 @@ class FormSectionState extends State<FormSection> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? nameError;
   String? phoneError;
+  String completePhoneNumber = '';
 
   @override
   void initState() {
@@ -342,7 +358,6 @@ class FormSectionState extends State<FormSection> {
         phoneError = widget.phoneErrorMessage;
       });
     }
-    
   }
 
   @override
@@ -372,8 +387,10 @@ class FormSectionState extends State<FormSection> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                TextFormField(
+                IntlPhoneField(
                   controller: phoneNoController,
+                  initialCountryCode: 'BD',
+                  disableLengthCheck: true,
                   decoration: InputDecoration(
                     label: const Text("Phone No"),
                     prefixIcon: const Icon(Icons.phone),
@@ -381,6 +398,13 @@ class FormSectionState extends State<FormSection> {
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
+                  onChanged: (phone) {
+                    completePhoneNumber = phone.completeNumber;
+                    if (kDebugMode) {
+                      print(phone.completeNumber);
+                    }
+                  },
+                   showCursor: true, // Optional: to hide the cursor, set this to false
                 ),
                 const SizedBox(height: 15),
                 TextFormField(
@@ -407,7 +431,6 @@ class FormSectionState extends State<FormSection> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -418,15 +441,10 @@ class FormSectionState extends State<FormSection> {
                           phoneError = null;
                         });
 
-                        // Show the loading dialog
-                        
                         await widget.onSubmit(
                           nameController.text,
-                          phoneNoController.text,
+                          completePhoneNumber,
                         );
-
-                        // Hide the loading dialog
-                        // ignore: use_build_context_synchronously
                       }
                     },
                     child: const Text("SIGN UP"),

@@ -38,7 +38,7 @@ class OTPScreenState extends State<OTPScreen> {
 
       final response = await http.post(
         url,
-         headers: <String, String>{
+        headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
@@ -78,9 +78,21 @@ class OTPScreenState extends State<OTPScreen> {
           );
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Server error. Please try again later.')),
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Opps!',
+            message: responseData['message'],
+            contentType: ContentType.failure,
+          ),
         );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -89,7 +101,7 @@ class OTPScreenState extends State<OTPScreen> {
     }
   }
 
-  Future<void> _sendUserId(BuildContext context) async {
+  Future<void> _resendOtp(BuildContext context) async {
     final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/otp_send');
 
     try {
@@ -105,26 +117,25 @@ class OTPScreenState extends State<OTPScreen> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-    
+
         final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Yeah!',
-                message: responseData['message'],
-                contentType: ContentType.success,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Yeah!',
+            message: responseData['message'],
+            contentType: ContentType.success,
+          ),
+        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
 
         setState(() {
           _isOTPSent = true;
           _startCountdown();
         });
-
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Server error. Please try again later.')),
@@ -193,7 +204,7 @@ class OTPScreenState extends State<OTPScreen> {
                     if (!_isOTPSent)
                       TextButton(
                         onPressed: () {
-                          _sendUserId(context);
+                          _resendOtp(context);
                         },
                         child: const Text(
                           'Resend OTP',
@@ -208,6 +219,7 @@ class OTPScreenState extends State<OTPScreen> {
                     const SizedBox(height: 20.0),
                     Center(
                       child: OtpTextField(
+                        alignment: Alignment.center,
                         mainAxisAlignment: MainAxisAlignment.center,
                         numberOfFields: 6,
                         fillColor: Colors.black.withOpacity(0.1),
@@ -228,9 +240,19 @@ class OTPScreenState extends State<OTPScreen> {
                           if (_otpCode.isNotEmpty) {
                             _verifyOTP(context);
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Please enter the OTP code.')),
+                            final snackBar = SnackBar(
+                              elevation: 0,
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.transparent,
+                              content: AwesomeSnackbarContent(
+                                title: 'Opps!',
+                                message: 'Please enter the OTP code.',
+                                contentType: ContentType.failure,
+                              ),
                             );
+                            ScaffoldMessenger.of(context)
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(snackBar);
                           }
                         },
                         child: const Text(TTexts.tNext),

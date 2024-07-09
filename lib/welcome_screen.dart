@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application/singup_screen.dart';
+import 'package:flutter_application/signup_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/utils/constants/sizes.dart';
