@@ -91,7 +91,6 @@ class CardRechargeScreenState extends State<CardRechargeScreen> {
         //         contentType: ContentType.success,
         //       ),
         //     );
-        //     // ignore: use_build_context_synchronously
         //     ScaffoldMessenger.of(context)
         //       ..hideCurrentSnackBar()
         //       ..showSnackBar(snackBar);
@@ -230,7 +229,96 @@ class FormSection extends StatefulWidget {
 
 class FormSectionState extends State<FormSection> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
+
+  Future<void> submit() async {
+    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/card_recharge');
+    
+    AlertBuilder.showLoadingDialog(context); // Show loading dialog
+
+    try {
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'seller_id': GlobalData.userData?['reseller_id'],
+          'code': widget.cardController.text,
+          'mac_address': widget.macController.text,
+          'ip_address': widget.ipAddressController.text,
+          'user_id': GlobalData.userData?['id'], // Replace with actual user ID
+          'device_key': GlobalData.userData?['device_key'], // Replace with actual device key
+        }),
+      );
+
+
+      if (response.statusCode == 200) {
+      AlertBuilder.hideLoadingDialog(context); // Hide loading dialog
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        GlobalData.userData = responseData['user'];
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Success!',
+            message: responseData['message'],
+            contentType: ContentType.success,
+          ),
+        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      } else if (response.statusCode == 422) {
+      AlertBuilder.hideLoadingDialog(context); // Hide loading dialog in case of error
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Error!',
+            message: responseData['message'] ?? 'Validation failed',
+            contentType: ContentType.failure,
+          ),
+        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      } else {
+        AlertBuilder.hideLoadingDialog(context);
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Error!',
+            message: 'Something went wrong',
+            contentType: ContentType.failure,
+          ),
+        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
+      }
+    } catch (e) {
+      AlertBuilder.hideLoadingDialog(context); // Hide loading dialog in case of error
+      final snackBar = SnackBar(
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'Error!',
+          message: 'An error occurred: $e',
+          contentType: ContentType.failure,
+        ),
+      );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isPlatformDark =
@@ -308,11 +396,9 @@ class FormSectionState extends State<FormSection> {
                     child: ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                         
-
-                           
+                          await submit();
                         }
-                       },
+                      },
                       child: const Text("RECHARGE"),
                     ),
                   ),
