@@ -1,6 +1,6 @@
 // number_converter.dart
 class Translate {
-  static String convertToBangla(int number) {
+  static String convertToBangla(number) {
     const englishToBangla = {
       '0': '০',
       '1': '১',

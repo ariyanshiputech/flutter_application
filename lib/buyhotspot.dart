@@ -2,6 +2,10 @@
 
 import 'dart:convert';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
+import 'package:ariyanpay/ariyanpay.dart';
+import 'package:ariyanpay/models/customer_model.dart';
+import 'package:ariyanpay/models/request_response.dart';
+import 'package:ariyanpay/widget/custom_snackbar.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,10 +17,6 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application/utils/constants/sizes.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:uddoktapay/models/customer_model.dart';
-import 'package:uddoktapay/models/request_response.dart';
-import 'package:uddoktapay/uddoktapay.dart';
-import 'package:uddoktapay/widget/custom_snackbar.dart';
 
 import 'main_screen.dart';
 
@@ -414,7 +414,7 @@ void proccessPayment(dynamic data) async {
                           try {
                             AlertBuilder.showLoadingDialog(context);
                             final response =
-                                await UddoktaPay.createPayment(
+                                await Ariyanpay.createPayment(
                               context: context,
                               customer: CustomerDetails(
                                 fullName: GlobalData.userData?['name'],

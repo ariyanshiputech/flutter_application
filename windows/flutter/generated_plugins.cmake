@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
   file_selector_windows
   permission_handler_windows
+  platform_device_id_windows
   url_launcher_windows
 )
 

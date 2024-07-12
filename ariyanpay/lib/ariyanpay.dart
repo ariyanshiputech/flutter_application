@@ -1,21 +1,21 @@
 // ignore_for_file: use_build_context_synchronously
 
-library uddoktapay;
+library ariyanpay;
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uddoktapay/controllers/payment_controller.dart';
-import 'package:uddoktapay/models/customer_model.dart';
-import 'package:uddoktapay/models/request_response.dart';
-import 'package:uddoktapay/views/payment_screen.dart';
+import 'package:ariyanpay/controllers/payment_controller.dart';
+import 'package:ariyanpay/models/customer_model.dart';
+import 'package:ariyanpay/models/request_response.dart';
+import 'package:ariyanpay/views/payment_screen.dart';
 import '../core/services/api_services.dart';
 import '../models/credentials.dart';
 
-class UddoktaPay {
+class Ariyanpay {
   static Future<RequestResponse> createPayment({
     required BuildContext context,
     required CustomerDetails customer,
-    UddoktapayCredentials? credentials,
+    AriyanpayCredentials? credentials,
     required String amount,
     dynamic valueA,
     dynamic valueB,

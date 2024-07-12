@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:all_platform_device_id/all_platform_device_id.dart';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/foundation.dart';
@@ -15,7 +16,7 @@ import 'package:flutter_application/utils/constants/text_strings.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:flutter_application/form_header_widget.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:android_id/android_id.dart';
+// import 'package:android_id/android_id.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -39,19 +40,23 @@ class SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _initializeDeviceInfo() async {
-    const androidIdPlugin = AndroidId();
+    // const androidIdPlugin = AndroidId();
     final NetworkInfo networkInfo = NetworkInfo();
 
     try {
       String? deviceId;
       String ipAddress;
 
-      if (Platform.isAndroid) {
-        final String? androidId = await androidIdPlugin.getId();
-        deviceId = androidId; // Unique ID on Android
-      } else {
-        deviceId = 'Unsupported platform';
-      }
+
+          deviceId = await PlatformDeviceId.getDeviceId;
+    
+      // if (Platform.isAndroid) {
+      //   final String? androidId = await androidIdPlugin.getId();
+      //   deviceId = androidId; // Unique ID on Android
+      // } else {
+      //   deviceId = 'Unsupported platform';
+      // }
+
 
       ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
 

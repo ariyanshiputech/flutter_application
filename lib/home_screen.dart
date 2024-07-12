@@ -6,7 +6,6 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/buyhotspot.dart';
 import 'package:flutter_application/card_recharge.dart';
 import 'package:flutter_application/global_data.dart';
@@ -41,13 +40,22 @@ class HomeScreenState extends State<HomeScreen> {
   bool lottieAnimate = false;
   String? ipAddress;
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchData();
-    _getIPAddress();
-  }
+@override
+  void initState()
+{
+  super.initState();
+  _getIPAddress();
+}
 
+
+  Future<void> _getIPAddress() async {
+    final NetworkInfo networkInfo = NetworkInfo();
+    String? ip = await networkInfo.getWifiIP();
+    setState(() {
+      ipAddress = ip ?? 'Unknown IP Address';
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     final theme = ThemeModelInheritedNotifier.of(context).theme;
@@ -260,76 +268,7 @@ class HomeScreenState extends State<HomeScreen> {
     );
   }
 
-Future<void> _fetchData() async {
-    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/get_info');
-    final NetworkInfo networkInfo = NetworkInfo();
-    String? ip = await networkInfo.getWifiIP();
-    setState(() {
-      ipAddress = ip ?? 'Unknown IP Address';
-    });
-      AlertBuilder.showLoadingDialog(context);
-    try {
-      final response = await http.post(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-          'Access-Control-Allow-Origin': '*',
-        },
-        body: jsonEncode(<String, dynamic>{
-          'ipAddress': ipAddress,
-          'reseller_id' : GlobalData.userData?['reseller_id'],
-        }),
-      );
 
-      if (response.statusCode == 200) {
-        AlertBuilder.hideLoadingDialog(context);
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        // Handle the fetched data as needed
-        setState(() {
-          GlobalData.resellerData = responseData;
-          // Optionally update other state variables based on the fetched data
-        });
-
-        if (kDebugMode) {
-          print('Data fetched successfully');
-          print('Response body: ${response.body}');
-        }
-      } else {
-        AlertBuilder.hideLoadingDialog(context);
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Opps!',
-                message: responseData['message'],
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
-        if (kDebugMode) {
-          print('Failed to fetch data. Status code: ${response.statusCode}');
-          print('Response body: ${response.body}');
-        }
-      }
-    } catch (e) {
-        AlertBuilder.hideLoadingDialog(context);
-      if (kDebugMode) {
-        print('Error occurred while fetching data: $e');
-      }
-    }
-  }
-
-  Future<void> _getIPAddress() async {
-    final NetworkInfo networkInfo = NetworkInfo();
-    String? ip = await networkInfo.getWifiIP();
-    setState(() {
-      ipAddress = ip ?? 'Unknown IP Address';
-    });
-  }
 
   Future<void> _connectWifi() async {
     final deviceKey = GlobalData.userData?['device_key'];

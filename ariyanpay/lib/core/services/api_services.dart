@@ -1,21 +1,21 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
+import 'package:ariyanpay/models/credentials.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:uddoktapay/controllers/payment_controller.dart';
-import 'package:uddoktapay/models/customer_model.dart';
-import 'package:uddoktapay/models/request_response.dart';
-import 'package:uddoktapay/utils/config.dart';
-import 'package:uddoktapay/utils/endpoints.dart';
-import 'package:uddoktapay/widget/custom_snackbar.dart';
-import '../../models/credentials.dart';
+import 'package:ariyanpay/controllers/payment_controller.dart';
+import 'package:ariyanpay/models/customer_model.dart';
+import 'package:ariyanpay/models/request_response.dart';
+import 'package:ariyanpay/utils/config.dart';
+import 'package:ariyanpay/utils/endpoints.dart';
+import 'package:ariyanpay/widget/custom_snackbar.dart';
 
 class ApiServices {
   static Future<Map<dynamic, dynamic>> createPaymentRequest({
-    UddoktapayCredentials? uddoktapayCredentials,
+    AriyanpayCredentials? ariyanpayCredentials,
     required CustomerDetails customer,
     required String amount,
     dynamic valueA,
@@ -48,20 +48,20 @@ class ApiServices {
 
     final controller = Get.put(PaymentController());
 
-    if (uddoktapayCredentials == null) {
+    if (ariyanpayCredentials == null) {
       controller.panelURL.value = AppConfig.sandboxURL;
       controller.apiKey.value = AppConfig.sandboxAPIKey;
     } else {
-      controller.panelURL.value = uddoktapayCredentials.panelURL;
-      controller.apiKey.value = uddoktapayCredentials.apiKey;
+      controller.panelURL.value = ariyanpayCredentials.panelURL;
+      controller.apiKey.value = ariyanpayCredentials.apiKey;
     }
 
     try {
       final http.Response response = await http.post(
         Uri.parse(
-          uddoktapayCredentials == null
+          ariyanpayCredentials == null
               ? AppConfig.sandboxURL + Endpoints.createPayment
-              : '${uddoktapayCredentials.panelURL}${Endpoints.createPayment}',
+              : '${ariyanpayCredentials.panelURL}${Endpoints.createPayment}',
         ),
         headers: <String, String>{
           'Content-Type': 'application/json',

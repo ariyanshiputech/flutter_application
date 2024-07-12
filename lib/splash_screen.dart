@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:all_platform_device_id/all_platform_device_id.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/global_data.dart';
@@ -8,7 +8,6 @@ import 'package:flutter_application/otp_screen.dart';
 import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/welcome_screen.dart';
 import 'package:http/http.dart' as http;
-import 'package:android_id/android_id.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -29,14 +28,10 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _initializeDeviceInfo() async {
-    const androidIdPlugin = AndroidId();
     String? deviceId;
     try {
-      if (Platform.isAndroid) {
-        deviceId = await androidIdPlugin.getId(); // Unique ID on Android
-      } else {
-        deviceId = 'Unsupported platform';
-      }
+      deviceId = await PlatformDeviceId.getDeviceId;
+
       if (deviceId != null) {
         setState(() {
           deviceKey = deviceId;

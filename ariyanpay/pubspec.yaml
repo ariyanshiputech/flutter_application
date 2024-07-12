@@ -1,16 +1,16 @@
-name: uddoktapay
-description: "Flutter package for UddoktaPay by Programming Wormhole"
+name: ariyanpay
+description: "Flutter package for ariyanpay by Ariyan Shipu"
 version: 0.0.3
-homepage: https://programmingwormhole.com
-repository: https://github.com/programmingwormhole/uddoktapay
-issue_tracker: https://github.com/programmingwormhole/uddoktapay/issues
-documentation: https://youtube.com/@programmingwormhole
-example: https://github.com/programmingwormhole/uddoktapay/tree/master/example
+homepage: https://ariyanshipu.me
+repository: https://github.com/ariyanshipuofficial/ariyanpay
+issue_tracker: https://github.com/ariyanshipuofficial/ariyanpay/issues
+documentation: https://youtube.com/@ariyanshipuofficial
+example: https://github.com/ariyanshipuofficial/ariyanpay/tree/master/example
 topics:
   - flutter
   - payment
-  - uddoktapay
-  - programmingwormhole
+  - ariyanpay
+  - ariyanshipuofficial
 screenshots:
   - https://lh3.googleusercontent.com/p/AF1QipMncwNApi_xHTH1niw3xbkwq3I1FnY1RL_Xi07s=s1360-w1360-h1020
 

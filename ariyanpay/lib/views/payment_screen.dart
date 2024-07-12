@@ -2,10 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:uddoktapay/controllers/payment_controller.dart';
-import 'package:uddoktapay/core/services/api_services.dart';
-import 'package:uddoktapay/loadingwidget.dart';
-import 'package:uddoktapay/utils/config.dart';
+import 'package:ariyanpay/controllers/payment_controller.dart';
+import 'package:ariyanpay/core/services/api_services.dart';
+import 'package:ariyanpay/loadingwidget.dart';
+import 'package:ariyanpay/utils/config.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 class PaymentScreen extends StatelessWidget {

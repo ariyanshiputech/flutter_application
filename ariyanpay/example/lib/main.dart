@@ -1,7 +1,9 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:ariyanpay/models/customer_model.dart';
 import 'package:ariyanpay/models/request_response.dart';
-import 'package:ariyanpay/uddoktapay.dart';
+import 'package:ariyanpay/ariyanpay.dart';
 import 'package:ariyanpay/widget/custom_snackbar.dart';
 
 void main() {
@@ -33,24 +35,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final _phone = TextEditingController();
+  final _email = TextEditingController();
   final _name = TextEditingController();
-  final _amount = TextEditingController();
   final _key = GlobalKey<FormState>();
-
-  @override
-  void dispose() {
-    _phone.dispose();
-    _name.dispose();
-    _amount.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Uddoktapay Example'),
+        title: const Text('ariyanpay Example'),
       ),
       body: Center(
         child: Padding(
@@ -81,22 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     }
                     return null;
                   },
-                  controller: _amount,
-                  decoration: const InputDecoration(
-                    hintText: 'Amount',
-                  ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                TextFormField(
-                  validator: (p0) {
-                    if (p0!.isEmpty) {
-                      return 'Field is required';
-                    }
-                    return null;
-                  },
-                  controller: _phone,
+                  controller: _email,
                   decoration: const InputDecoration(
                     hintText: 'Email',
                   ),
@@ -107,29 +85,35 @@ class _MyHomePageState extends State<MyHomePage> {
                 ElevatedButton(
                   onPressed: () async {
                     if (_key.currentState!.validate()) {
-                      try {
-                        final response = await UddoktaPay.createPayment(
-                          context: context,
-                          customer: CustomerDetails(
-                            fullName: _name.text,
-                            cusPhone: _phone.text,
-                          ),
-                          amount: _amount.text,
-                        );
+                      final response = await Ariyanpay.createPayment(
+                        context: context,
+                        customer: CustomerDetails(
+                          fullName: 'Ariyan Shipu',
+                          cusPhone: '0181111111',
+                        ),
+                        amount: '50',
+                        valueA: '',
+                        valueB: '',
+                        valueC: '',
+                        valueD: '',
+                        valueE: '',
+                        valueF: '',
+                        valueG: '',
+                      );
 
-                        if (response.status == ResponseStatus.completed) {
-                          // handle on complete
-                          snackBar('Success. TRX_ID ${response.invoiceId}', context);
-                        } else if (response.status == ResponseStatus.canceled) {
-                          // handle on cancel
-                          snackBar('Payment Canceled', context);
-                        } else if (response.status == ResponseStatus.pending) {
-                          // handle on pending
-                          snackBar('Payment Pending', context);
-                        }
-                      } catch (e) {
-                        // handle exception
-                        snackBar('An error occurred: $e', context);
+
+
+                      if (response.status == ResponseStatus.completed) {
+                        // handle on complete
+                        snackBar('Success. TRX_ID ${response.invoiceId}', context);
+                      }
+
+                      if (response.status == ResponseStatus.canceled) {
+                        // handle on cancel
+                      }
+
+                      if (response.status == ResponseStatus.pending) {
+                        // handle on pending
                       }
                     }
                   },
