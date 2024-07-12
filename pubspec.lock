@@ -44,9 +44,10 @@ packages:
   ariyanpay:
     dependency: "direct main"
     description:
-      path: ariyanpay
-      relative: true
-    source: path
+      name: ariyanpay
+      sha256: "9e27d49e09b612e94f482b38914d2e80887e0a24acabc9ff0cf5fa5d4eca08e3"
+      url: "https://pub.dev"
+    source: hosted
     version: "0.0.3"
   async:
     dependency: transitive
