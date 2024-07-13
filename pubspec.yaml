@@ -42,8 +42,8 @@ dependencies:
   percent_indicator: ^4.2.2
   lottie: ^2.7.0
   toast: ^0.3.0
-  all_platform_device_id: ^1.0.8
-  ariyanpay: ^0.0.3
+  all_platform_device_id: ^2.0.0
+  ariyanpay: ^0.0.4
 
 dev_dependencies:
   flutter_test:
