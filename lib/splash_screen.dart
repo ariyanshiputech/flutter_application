@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'package:all_platform_device_id/all_platform_device_id.dart';
+import 'dart:io';
+import 'package:device_info/device_info.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/global_data.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/welcome_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
+import 'package:platform_device_id_platform_interface/platform_device_id_platform_interface.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,6 +22,8 @@ class SplashScreen extends StatefulWidget {
 class SplashScreenState extends State<SplashScreen> {
   String? deviceKey;
   bool isVerified = false;
+  DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+
 
   @override
   void initState() {
@@ -30,8 +34,19 @@ class SplashScreenState extends State<SplashScreen> {
   Future<void> _initializeDeviceInfo() async {
     String? deviceId;
     try {
-      deviceId = await PlatformDeviceId.getDeviceId;
 
+      if (kIsWeb) {
+        deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
+      } else if (Platform.isAndroid) {
+        AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+        deviceId = androidInfo.androidId;
+      } else if (Platform.isIOS) {
+        IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+        deviceId = iosInfo.identifierForVendor;
+      } else {
+        deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
+      }
+      
       if (deviceId != null) {
         setState(() {
           deviceKey = deviceId;

@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:all_platform_device_id/all_platform_device_id.dart';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
+import 'package:device_info/device_info.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/alert_builder.dart';
@@ -16,6 +16,8 @@ import 'package:flutter_application/utils/constants/text_strings.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:flutter_application/form_header_widget.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:platform_device_id_platform_interface/platform_device_id_platform_interface.dart';
+
 // import 'package:android_id/android_id.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -41,14 +43,25 @@ class SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _initializeDeviceInfo() async {
     // const androidIdPlugin = AndroidId();
+    DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
     final NetworkInfo networkInfo = NetworkInfo();
 
     try {
       String? deviceId;
       String ipAddress;
 
+      if (kIsWeb) {
+        deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
+      } else if (Platform.isAndroid) {
+        AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+        deviceId = androidInfo.androidId;
+      } else if (Platform.isIOS) {
+        IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+        deviceId = iosInfo.identifierForVendor;
+      } else {
+        deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
+      }
 
-          deviceId = await PlatformDeviceId.getDeviceId;
     
       // if (Platform.isAndroid) {
       //   final String? androidId = await androidIdPlugin.getId();

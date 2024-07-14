@@ -13,7 +13,7 @@ dependencies:
 
   image_picker: ^1.1.2
   network_info_plus: ^5.0.3
-  device_info_plus: ^10.1.0
+  # device_info_plus: ^10.1.0
   http: ^1.2.0
   intl: ^0.19.0
   logger: ^2.0.1
@@ -42,9 +42,11 @@ dependencies:
   percent_indicator: ^4.2.2
   lottie: ^2.7.0
   toast: ^0.3.0
-  all_platform_device_id: ^2.0.0
   ariyanpay: ^0.0.4
-
+  platform_device_id_web: ^1.0.0
+  device_info: ^2.0.0
+  platform_device_id_platform_interface: ^1.0.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
