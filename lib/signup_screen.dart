@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:device_info/device_info.dart';
@@ -17,6 +18,7 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:flutter_application/form_header_widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:platform_device_id_platform_interface/platform_device_id_platform_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // import 'package:android_id/android_id.dart';
 
@@ -41,49 +43,74 @@ class SignUpScreenState extends State<SignUpScreen> {
     _initializeDeviceInfo();
   }
 
-  Future<void> _initializeDeviceInfo() async {
-    // const androidIdPlugin = AndroidId();
-    DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-    final NetworkInfo networkInfo = NetworkInfo();
+Future<void> _initializeDeviceInfo() async {
+  DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  final NetworkInfo networkInfo = NetworkInfo();
 
-    try {
-      String? deviceId;
-      String ipAddress;
+  try {
+    String? deviceId;
+    String ipAddress;
 
-      if (kIsWeb) {
-        deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
-      } else if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
-        deviceId = androidInfo.androidId;
-      } else if (Platform.isIOS) {
-        IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
-        deviceId = iosInfo.identifierForVendor;
-      } else {
-        deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
-      }
-
-    
-      // if (Platform.isAndroid) {
-      //   final String? androidId = await androidIdPlugin.getId();
-      //   deviceId = androidId; // Unique ID on Android
-      // } else {
-      //   deviceId = 'Unsupported platform';
-      // }
-
-
+    if (kIsWeb) {
+       deviceId = await _getOrCreateDeviceId();
+      // Get IP address using a web service
+      ipAddress = await _getWebIpAddress();
+    } else if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+      deviceId = androidInfo.androidId;
       ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
-
-      setState(() {
-        _deviceKeyController.text = deviceId!;
-        _ipAddressController.text = ipAddress;
-      });
-    } catch (e) {
-      setState(() {
-        _deviceKeyController.text = 'Failed to get device ID';
-        _ipAddressController.text = 'Failed to get IP Address';
-      });
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+      deviceId = iosInfo.identifierForVendor;
+      ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
+    } else {
+      deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
+      ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
     }
+
+    setState(() {
+      _deviceKeyController.text = deviceId!;
+      _ipAddressController.text = ipAddress;
+    });
+  } catch (e) {
+    setState(() {
+      _deviceKeyController.text = 'Failed to get device ID';
+      _ipAddressController.text = 'Failed to get IP Address';
+    });
   }
+}
+Future<String> _getOrCreateDeviceId() async {
+  final prefs = await SharedPreferences.getInstance();
+  String? deviceId = prefs.getString('device_id');
+
+  if (deviceId == null) {
+    deviceId = _generateRandomString(32);
+    await prefs.setString('device_id', deviceId);
+  }
+
+  return deviceId;
+}
+
+String _generateRandomString(int length) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  final rnd = Random();
+  return String.fromCharCodes(Iterable.generate(
+      length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+}
+
+Future<String> _getWebIpAddress() async {
+  try {
+    final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> data = jsonDecode(response.body);
+      return data['ip'] ?? 'Unknown IP Address';
+    } else {
+      return 'Unknown IP Address';
+    }
+  } catch (e) {
+    return 'Failed to get IP Address';
+  }
+}
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();

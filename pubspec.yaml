@@ -46,6 +46,8 @@ dependencies:
   platform_device_id_web: ^1.0.0
   device_info: ^2.0.0
   platform_device_id_platform_interface: ^1.0.0
+  shared_preferences: ^2.2.3
+  uuid: ^4.4.2
   
 dev_dependencies:
   flutter_test:
