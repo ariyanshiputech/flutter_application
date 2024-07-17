@@ -68,15 +68,12 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> verifyUser(String deviceKey) async {
-    var url = Uri.http('lalpoolnetwork.net', '/api/v2/apps/check_user');
+    var url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/check_user');
     try {
       var response = await http.post(
         url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
         body: jsonEncode(<String, String>{
           'device_key': deviceKey,

@@ -121,9 +121,6 @@ class SignUpScreenState extends State<SignUpScreen> {
         url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
         body: jsonEncode(<String, String>{
           'name': name,

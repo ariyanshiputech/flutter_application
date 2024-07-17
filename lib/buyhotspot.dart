@@ -86,7 +86,6 @@ class BuyHotspotScreenState extends State<BuyHotspotScreen> {
         url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Access-Control-Allow-Origin': '*',
         },
         body: jsonEncode(<String, dynamic>{
           'ipAddress': ipAddress,
@@ -260,7 +259,6 @@ void proccessPayment(dynamic data) async {
       url,
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
-        'Access-Control-Allow-Origin': '*',
       },
       body: jsonEncode(<dynamic, dynamic>{
         'invoice_id': data.invoiceId,

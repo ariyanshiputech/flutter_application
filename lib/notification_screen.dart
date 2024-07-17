@@ -44,7 +44,6 @@ class NotificationScreenState extends State<NotificationScreen>
         url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Access-Control-Allow-Origin': '*',
         },
         body: jsonEncode(<String, dynamic>{
           'device_key': GlobalData.userData?['device_key'],

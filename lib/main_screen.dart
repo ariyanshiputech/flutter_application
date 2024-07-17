@@ -64,7 +64,6 @@ class MainScreenState extends State<MainScreen> {
         url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Access-Control-Allow-Origin': '*',
         },
         body: jsonEncode(<String, dynamic>{
           'ipAddress': ipAddress,
