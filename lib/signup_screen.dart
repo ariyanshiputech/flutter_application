@@ -20,8 +20,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:platform_device_id_platform_interface/platform_device_id_platform_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-// import 'package:android_id/android_id.dart';
-
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
@@ -43,74 +41,73 @@ class SignUpScreenState extends State<SignUpScreen> {
     _initializeDeviceInfo();
   }
 
-Future<void> _initializeDeviceInfo() async {
-  DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
-  final NetworkInfo networkInfo = NetworkInfo();
+  Future<void> _initializeDeviceInfo() async {
+    DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+    final NetworkInfo networkInfo = NetworkInfo();
 
-  try {
-    String? deviceId;
-    String ipAddress;
+    try {
+      String? deviceId;
+      String ipAddress;
 
-    if (kIsWeb) {
-       deviceId = await _getOrCreateDeviceId();
-      // Get IP address using a web service
-      ipAddress = await _getWebIpAddress();
-    } else if (Platform.isAndroid) {
-      AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
-      deviceId = androidInfo.androidId;
-      ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
-    } else if (Platform.isIOS) {
-      IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
-      deviceId = iosInfo.identifierForVendor;
-      ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
-    } else {
-      deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
-      ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
+      if (kIsWeb) {
+        deviceId = await _getOrCreateDeviceId();
+        ipAddress = await _getWebIpAddress();
+      } else if (Platform.isAndroid) {
+        AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
+        deviceId = androidInfo.androidId;
+        ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
+      } else if (Platform.isIOS) {
+        IosDeviceInfo iosInfo = await deviceInfoPlugin.iosInfo;
+        deviceId = iosInfo.identifierForVendor;
+        ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
+      } else {
+        deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
+        ipAddress = await networkInfo.getWifiIP() ?? 'Unknown IP Address';
+      }
+
+      setState(() {
+        _deviceKeyController.text = deviceId!;
+        _ipAddressController.text = ipAddress;
+      });
+    } catch (e) {
+      setState(() {
+        _deviceKeyController.text = 'Failed to get device ID';
+        _ipAddressController.text = 'Failed to get IP Address';
+      });
     }
-
-    setState(() {
-      _deviceKeyController.text = deviceId!;
-      _ipAddressController.text = ipAddress;
-    });
-  } catch (e) {
-    setState(() {
-      _deviceKeyController.text = 'Failed to get device ID';
-      _ipAddressController.text = 'Failed to get IP Address';
-    });
-  }
-}
-Future<String> _getOrCreateDeviceId() async {
-  final prefs = await SharedPreferences.getInstance();
-  String? deviceId = prefs.getString('device_id');
-
-  if (deviceId == null) {
-    deviceId = _generateRandomString(32);
-    await prefs.setString('device_id', deviceId);
   }
 
-  return deviceId;
-}
+  Future<String> _getOrCreateDeviceId() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? deviceId = prefs.getString('device_id');
 
-String _generateRandomString(int length) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  final rnd = Random();
-  return String.fromCharCodes(Iterable.generate(
-      length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
-}
-
-Future<String> _getWebIpAddress() async {
-  try {
-    final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      return data['ip'] ?? 'Unknown IP Address';
-    } else {
-      return 'Unknown IP Address';
+    if (deviceId == null || deviceId.isEmpty) {
+      deviceId = _generateRandomString(16);
+      await prefs.setString('device_id', deviceId);
     }
-  } catch (e) {
-    return 'Failed to get IP Address';
+    return deviceId;
   }
-}
+
+  String _generateRandomString(int length) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    final rnd = Random();
+    return String.fromCharCodes(Iterable.generate(
+        length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
+  }
+
+  Future<String> _getWebIpAddress() async {
+    try {
+      final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        return data['ip'] ?? 'Unknown IP Address';
+      } else {
+        return 'Unknown IP Address';
+      }
+    } catch (e) {
+      return 'Failed to get IP Address';
+    }
+  }
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
@@ -123,7 +120,7 @@ Future<String> _getWebIpAddress() async {
     }
   }
 
-  Future<void> _submitForm(String name, String phoneNo) async {
+  Future<void> _submitForm(String name, String phoneNo, String appId) async { // Updated
     setState(() {
       _isSubmitting = true;
     });
@@ -149,28 +146,24 @@ Future<String> _getWebIpAddress() async {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode(<String, dynamic>{ // Updated
           'name': name,
           'phoneNo': phoneNo,
+          'appId': appId, // Added
           'deviceKey': deviceKey,
           'ipAddress': ipAddress,
           if (base64Image != null) 'profileImage': base64Image,
         }),
       );
+      
       // Hide the loading dialog
-      // ignore: use_build_context_synchronously
+      AlertBuilder.hideLoadingDialog(context);
+
       if (response.statusCode == 201 || response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
-       // ignore: use_build_context_synchronously
-        AlertBuilder.hideLoadingDialog(context);
-
           final String phoneNumber = responseData['user']['phone'];
           final int userID = responseData['user']['id'];
-          if (kDebugMode) {
-            print('Sign up successful');
-            print('Phone Number: $phoneNumber');
-          }
           Navigator.push(
             // ignore: use_build_context_synchronously
             context,
@@ -180,8 +173,6 @@ Future<String> _getWebIpAddress() async {
           );
         }
       } else {
-      // ignore: use_build_context_synchronously
-      AlertBuilder.hideLoadingDialog(context);
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         setState(() {
           _nameErrorMessage = responseData['errors']?['name']?.first ?? '';
@@ -209,7 +200,7 @@ Future<String> _getWebIpAddress() async {
               behavior: SnackBarBehavior.floating,
               backgroundColor: Colors.transparent,
               content: AwesomeSnackbarContent(
-                title: 'Opps!',
+                title: 'Oops!',
                 message: _phoneErrorMessage,
                 contentType: ContentType.failure,
               ),
@@ -219,7 +210,21 @@ Future<String> _getWebIpAddress() async {
               ..showSnackBar(snackBar);
           }
 
-          
+      if (response.statusCode == 401) {
+           final snackBar = SnackBar(
+              elevation: 0,
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.transparent,
+              content: AwesomeSnackbarContent(
+                title: 'Oops!',
+                message: responseData['message'],
+                contentType: ContentType.failure,
+              ),
+            );
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(snackBar);
+          }
         });
 
         if (kDebugMode) {
@@ -314,8 +319,6 @@ Future<String> _getWebIpAddress() async {
                               ),
                             ),
                     ),
-                    const SizedBox(height: TSizes.tFormHeight - 10),
-                    const SizedBox(height: 20),
                     FormSection(
                       deviceKeyController: _deviceKeyController,
                       ipAddressController: _ipAddressController,
@@ -338,7 +341,7 @@ Future<String> _getWebIpAddress() async {
 class FormSection extends StatefulWidget {
   final TextEditingController deviceKeyController;
   final TextEditingController ipAddressController;
-  final Future<void> Function(String, String) onSubmit;
+  final Future<void> Function(String, String, String) onSubmit; // Updated
   final String nameErrorMessage;
   final String phoneErrorMessage;
   final bool isSubmitting;
@@ -360,6 +363,7 @@ class FormSection extends StatefulWidget {
 class FormSectionState extends State<FormSection> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneNoController = TextEditingController();
+  final TextEditingController appIdController = TextEditingController(); // Added
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? nameError;
   String? phoneError;
@@ -384,12 +388,10 @@ class FormSectionState extends State<FormSection> {
         phoneError = widget.phoneErrorMessage;
       });
     }
-    
   }
 
   @override
   Widget build(BuildContext context) {
-    // ignore: deprecated_member_use
     final isPlatformDark = WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
     final initTheme = isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
     return ThemeProvider(
@@ -426,6 +428,17 @@ class FormSectionState extends State<FormSection> {
                 ),
                 const SizedBox(height: 15),
                 TextFormField(
+                  controller: appIdController, // Added
+                  decoration: InputDecoration(
+                    label: const Text("App ID"), // Added
+                    prefixIcon: const Icon(Icons.apps), // Added
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextFormField(
                   controller: widget.deviceKeyController,
                   decoration: InputDecoration(
                     label: const Text("Device Key"),
@@ -449,7 +462,6 @@ class FormSectionState extends State<FormSection> {
                   ),
                 ),
                 const SizedBox(height: 15),
-                
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -461,14 +473,13 @@ class FormSectionState extends State<FormSection> {
                         });
 
                         // Show the loading dialog
-                        
                         await widget.onSubmit(
                           nameController.text,
                           phoneNoController.text,
+                          appIdController.text, // Pass appId
                         );
 
                         // Hide the loading dialog
-                        // ignore: use_build_context_synchronously
                       }
                     },
                     child: const Text("SIGN UP"),

@@ -158,7 +158,7 @@ class ProfileScreenState extends State<ProfileScreen> {
 
     // Decode the base64 string to bytes, or use null if it's not available
     Uint8List? decodedBytes;
-    if (base64Image != null && base64Image.isNotEmpty) {
+     if (base64Image != null && base64Image.isNotEmpty) {
       decodedBytes = base64Decode(base64Image);
     }
 

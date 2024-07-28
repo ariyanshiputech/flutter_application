@@ -47,20 +47,14 @@ class SplashScreenState extends State<SplashScreen> {
         deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
       }
       
-      if (deviceId != null) {
-        setState(() {
-          deviceKey = deviceId;
-        });
-        if (kDebugMode) {
-          print(deviceKey);
-        }
-        verifyUser(deviceKey!);
-      } else {
-        setState(() {
-          deviceKey = 'Failed to get device ID';
-        });
+      setState(() {
+        deviceKey = deviceId;
+      });
+      if (kDebugMode) {
+        print(deviceKey);
       }
-    } catch (e) {
+      verifyUser(deviceKey!);
+        } catch (e) {
       setState(() {
         deviceKey = 'Failed to get device ID';
       });
