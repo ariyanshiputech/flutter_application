@@ -22,6 +22,7 @@ import 'package:quickalert/widgets/quickalert_dialog.dart';
 import 'package:lottie/lottie.dart';
 import 'package:toast/toast.dart';
 import 'package:http/http.dart' as http;
+import 'package:in_app_update/in_app_update.dart'; // Import in_app_update
 
 class HomeScreen extends StatefulWidget {
   final Function(int) onNavigateToPage;
@@ -40,13 +41,26 @@ class HomeScreenState extends State<HomeScreen> {
   bool lottieAnimate = false;
   String? ipAddress;
 
-@override
-  void initState()
-{
-  super.initState();
-  _getIPAddress();
-}
+  @override
+  void initState() {
+    super.initState();
+    _getIPAddress();
+    _checkForUpdates(); // Check for updates
+  }
 
+  Future<void> _checkForUpdates() async {
+    try {
+      final updateInfo = await InAppUpdate.checkForUpdate();
+      
+      if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+        await InAppUpdate.performImmediateUpdate(); // Perform immediate update
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Failed to check for updates: $e');
+      }
+    }
+  }
 
   Future<void> _getIPAddress() async {
     final NetworkInfo networkInfo = NetworkInfo();
@@ -55,7 +69,7 @@ class HomeScreenState extends State<HomeScreen> {
       ipAddress = ip ?? 'Unknown IP Address';
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     final theme = ThemeModelInheritedNotifier.of(context).theme;
@@ -267,8 +281,6 @@ class HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-
 
   Future<void> _connectWifi() async {
     final deviceKey = GlobalData.userData?['device_key'];

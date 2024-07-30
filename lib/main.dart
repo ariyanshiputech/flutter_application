@@ -1,103 +1,38 @@
-import 'dart:async';
+import 'dart:io';
 
+import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/material.dart';
-import 'package:in_app_update/in_app_update.dart';
+import 'package:flutter_application/splash_screen.dart';
+import 'package:flutter_application/utils/theme/theme.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
+void main() {
+  HttpOverrides.global = MyHttpOverrides();
+  runApp(const MyApp());
 }
 
-class _MyAppState extends State<MyApp> {
-  AppUpdateInfo? _updateInfo;
-
-  GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey();
-
-  bool _flexibleUpdateAvailable = false;
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> checkForUpdate() async {
-    InAppUpdate.checkForUpdate().then((info) {
-      setState(() {
-        _updateInfo = info;
-      });
-    }).catchError((e) {
-      showSnack(e.toString());
-    });
-  }
-
-  void showSnack(String text) {
-    if (_scaffoldKey.currentContext != null) {
-      ScaffoldMessenger.of(_scaffoldKey.currentContext!)
-          .showSnackBar(SnackBar(content: Text(text)));
-    }
-  }
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: const Text('In App Update Example App'),
-        ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              Center(
-                child: Text('Update info: $_updateInfo'),
-              ),
-              ElevatedButton(
-                child: Text('Check for Update'),
-                onPressed: () => checkForUpdate(),
-              ),
-              ElevatedButton(
-                child: Text('Perform immediate update'),
-                onPressed: _updateInfo?.updateAvailability ==
-                        UpdateAvailability.updateAvailable
-                    ? () {
-                        InAppUpdate.performImmediateUpdate()
-                            .catchError((e) {
-                              showSnack(e.toString());
-                             return AppUpdateResult.inAppUpdateFailed;
-                            });
-                      }
-                    : null,
-              ),
-              ElevatedButton(
-                child: Text('Start flexible update'),
-                onPressed: _updateInfo?.updateAvailability ==
-                        UpdateAvailability.updateAvailable
-                    ? () {
-                        InAppUpdate.startFlexibleUpdate().then((_) {
-                          setState(() {
-                            _flexibleUpdateAvailable = true;
-                          });
-                        }).catchError((e) {
-                          showSnack(e.toString());
-                        });
-                      }
-                    : null,
-              ),
-              ElevatedButton(
-                child: Text('Complete flexible update'),
-                onPressed: !_flexibleUpdateAvailable
-                    ? null
-                    : () {
-                        InAppUpdate.completeFlexibleUpdate().then((_) {
-                          showSnack("Success!");
-                        }).catchError((e) {
-                          showSnack(e.toString());
-                        });
-                      },
-              )
-            ],
-          ),
-        ),
-      ),
+    return ThemeProvider(
+      initTheme: TAppTheme.lightTheme, // Set your initial theme
+      builder: (context, myTheme) {
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: myTheme,
+          home: const SplashScreen(),
+        );
+      },
     );
+  }
+}
+
+  class MyHttpOverrides extends HttpOverrides{
+  @override
+  HttpClient createHttpClient(SecurityContext? context){
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
   }
 }
