@@ -11,6 +11,7 @@ import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/home_screen.dart';
 import 'package:flutter_application/notification_screen.dart';
+import 'package:flutter_application/settings_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:network_info_plus/network_info_plus.dart';
@@ -55,10 +56,10 @@ class MainScreenState extends State<MainScreen> {
     setState(() {
       ipAddress = ip ?? 'Unknown IP Address';
     });
-    if (mounted){
-      AlertBuilder.showLoadingDialog(context);
+    // if (mounted){
+    //   AlertBuilder.showLoadingDialog(context);
 
-    } // Add this check to ensure the widget is still mounted
+    // } // Add this check to ensure the widget is still mounted
     try {
       final response = await http.post(
         url,
@@ -72,7 +73,7 @@ class MainScreenState extends State<MainScreen> {
       );
 
       if (response.statusCode == 200) {
-        AlertBuilder.hideLoadingDialog(context);
+        // AlertBuilder.hideLoadingDialog(context);
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         // Handle the fetched data as needed
         setState(() {
@@ -80,12 +81,13 @@ class MainScreenState extends State<MainScreen> {
           // Optionally update other state variables based on the fetched data
         });
 
+        
+
         if (kDebugMode) {
           print('Data fetched successfully');
           print('Response body: ${response.body}');
         }
       } else {
-        AlertBuilder.hideLoadingDialog(context);
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         final snackBar = SnackBar(
               elevation: 0,
@@ -136,7 +138,7 @@ class MainScreenState extends State<MainScreen> {
                 initialSelection: currentPage,
                 tabs: [
                   TabData(iconData: LineAwesomeIcons.home_solid, title: ""),
-                  TabData(iconData: LineAwesomeIcons.user, title: ""),
+                  TabData(iconData: LineAwesomeIcons.cog_solid, title: ""),
                   TabData(iconData: LineAwesomeIcons.bell, title: ""),
                 ],
                 onTabChangedListener: (position) {
@@ -157,6 +159,8 @@ class MainScreenState extends State<MainScreen> {
       case 0:
         return HomeScreen(onNavigateToPage: updatePage);
       case 1:
+      return SettingsScreen(onNavigateToPage: updatePage);
+      case 2:
       return NotificationScreen(onNavigateToPage: updatePage);
       default:
         return const Text('404 Page');

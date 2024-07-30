@@ -1,4 +1,4 @@
-package com.example.flutter_application
+package com.ariyanshipu.lalpoolnetwork
 
 import io.flutter.embedding.android.FlutterActivity
 

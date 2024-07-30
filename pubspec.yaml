@@ -13,7 +13,6 @@ dependencies:
 
   image_picker: ^1.1.2
   network_info_plus: ^5.0.3
-  # device_info_plus: ^10.1.0
   http: ^1.2.0
   intl: ^0.19.0
   logger: ^2.0.1
@@ -48,7 +47,10 @@ dependencies:
   platform_device_id_platform_interface: ^1.0.0
   shared_preferences: ^2.2.3
   uuid: ^4.4.2
+  in_app_update: ^4.2.3
+  flutter_launcher_icons: ^0.13.1
   
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
