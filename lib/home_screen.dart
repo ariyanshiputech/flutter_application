@@ -49,18 +49,23 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _checkForUpdates() async {
-    try {
-      final updateInfo = await InAppUpdate.checkForUpdate();
-      
-      if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
-        await InAppUpdate.performImmediateUpdate(); // Perform immediate update
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Failed to check for updates: $e');
-      }
+  try {
+    final updateInfo = await InAppUpdate.checkForUpdate();
+
+    if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+      // Perform a flexible update
+      await InAppUpdate.startFlexibleUpdate().then((_) {
+        // Complete the update after download
+        InAppUpdate.completeFlexibleUpdate();
+      });
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Failed to check for updates: $e');
     }
   }
+}
+
 
   Future<void> _getIPAddress() async {
     final NetworkInfo networkInfo = NetworkInfo();
@@ -100,7 +105,9 @@ class HomeScreenState extends State<HomeScreen> {
                 backgroundImage: decodedBytes != null
                     ? MemoryImage(decodedBytes)
                     : const AssetImage(TImages.placeholderimage) as ImageProvider,
-                onBackgroundImageError: (_, __) {},
+                onBackgroundImageError: (_, __) {
+                  
+                },
               ),
             ),
           ),

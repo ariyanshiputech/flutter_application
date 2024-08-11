@@ -269,12 +269,12 @@ void proccessPayment(dynamic data) async {
         'hotspot_sell_price': data.valueD,
         'validity': data.valueG,
         'mac_address': data.valueC,
+        
       }),
     );
-
-    final responseData = jsonDecode(response.body);
-    
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
     if (response.statusCode == 200) {
+        GlobalData.userData = responseData['user'];
       // Show success message
       final snackBar = SnackBar(
         elevation: 0,

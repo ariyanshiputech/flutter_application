@@ -48,7 +48,7 @@ class TColors {
 
   /* -- LIST OF ALL COLORS -- */
 
-static const tPrimaryColor = Color(0xFFFF5252);
+static const tPrimaryColor = Color(0xFF4b68ff); //Color(0xFFFF5252);
 static const tSecondaryColor = Color(0xFF272727);
 static const tAccentColor = Color(0xFF001BFF);
 

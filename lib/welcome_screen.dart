@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application/signup_screen.dart';
-import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/utils/constants/sizes.dart';
 import 'package:flutter_application/utils/constants/text_strings.dart';
@@ -11,39 +10,64 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: TColors.tPrimaryColor,
       body: Container(
         padding: const EdgeInsets.all(TSizes.tDefaultSize),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Image.asset(TImages.lightAppLogo),
+            // Image with semantic label for screen readers
+            Image.asset(
+              TImages.lightAppLogo,
+              width: 120.0,
+              height: 120.0,
+              semanticLabel: 'App logo representing Lalpool Network', // Detailed semantic label
+            ),
             Column(
               children: [
                 Text(
-                  TTexts.tWelcomeTitle,
-                  style: Theme.of(context).textTheme.headlineMedium,
-                ),
+                    TTexts.tWelcomeTitle.toUpperCase(),
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                    semanticsLabel: 'Welcome to Lalpool Network', // Updated semanticsLabel
+                  ),
+                const SizedBox(height: 10),
+                // Text with semantic label for subtitle
                 Text(
                   TTexts.tWelcomeSubTitle,
                   style: Theme.of(context).textTheme.bodyMedium,
                   textAlign: TextAlign.center,
+                  semanticsLabel: 'Please sign up to continue', // Updated semanticsLabel
                 ),
               ],
             ),
             Row(
               children: [
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const SignUpScreen()),
-                      );
-                    },
-                    child: Text(
-                      TTexts.tSignup.toUpperCase(),
+                  child: Semantics(
+                    button: true,
+                    label: 'Continue button',
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignUpScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 15.0), // Ensures touch target
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0), // Rounded corners
+                        ),
+                      ),
+                      child: Text(
+                        TTexts.tContinue.toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white, // Ensures contrast
+                          fontWeight: FontWeight.bold, // Emphasizes button text
+                        ),
+                      ),
                     ),
                   ),
                 ),

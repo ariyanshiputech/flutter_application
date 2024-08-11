@@ -2,6 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- Add these keys to the Info.plist -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need access to your location to show nearby WiFi hotspots.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We need access to your location to track your movement for the best services.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photos to upload images.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>We need access to your camera to take pictures.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to your microphone to capture audio.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

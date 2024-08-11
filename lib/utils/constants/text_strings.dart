@@ -98,8 +98,8 @@ static const String tOnBoardingCounter3 = "3/3";
 
 
 // -- Welcome Screen Text
-static const String tWelcomeTitle = "Build Awesome Apps";
-static const String tWelcomeSubTitle = "Let's put your creativity on the development highway.";
+static const String tWelcomeTitle = "Welcome To\nLalpool Network\n";
+static const String tWelcomeSubTitle = "A hotspot billing app for managing Wi-Fi services with real-time tracking, secure access, and customizable plans.";
 
 
 // -- Login Screen Text

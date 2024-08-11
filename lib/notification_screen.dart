@@ -1,14 +1,14 @@
 import 'dart:convert';
-import 'dart:async';
 import 'package:animated_theme_switcher/animated_theme_switcher.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application/utils/constants/translate.dart';
+import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
-import 'package:intl/intl.dart';
 
 class NotificationScreen extends StatefulWidget {
   final Function(int) onNavigateToPage;
@@ -22,8 +22,7 @@ class NotificationScreen extends StatefulWidget {
   NotificationScreenState createState() => NotificationScreenState();
 }
 
-class NotificationScreenState extends State<NotificationScreen>
-    with SingleTickerProviderStateMixin {
+class NotificationScreenState extends State<NotificationScreen> with SingleTickerProviderStateMixin {
   int currentPage = 2;
   late TabController _tabController;
   DateTime? currentBackPressTime;
@@ -164,14 +163,14 @@ class NotificationScreenState extends State<NotificationScreen>
         String amount = notification['amount'];
 
         return GestureDetector(
-          onTap: () => {},
+          onTap: () => _showNotificationDetails(notification),
           child: Container(
             decoration: const BoxDecoration(
               border: Border(
-                bottom: BorderSide(width: 1,color: TColors.grey)
+                bottom: BorderSide(width: 1, color: TColors.grey)
               )
             ),
-            margin: const EdgeInsets.only(left: 15,right: 15),
+            margin: const EdgeInsets.only(left: 15, right: 15),
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -218,7 +217,6 @@ class NotificationScreenState extends State<NotificationScreen>
                           style: const TextStyle(
                             fontSize: 16,
                             fontFamily: 'Bangla',
-                            color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -242,4 +240,149 @@ class NotificationScreenState extends State<NotificationScreen>
       },
     );
   }
+
+  void _showNotificationDetails(Map<String, dynamic> notification) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return NotificationDetailsPopup(notification: notification);
+      },
+    );
+  }
 }
+
+class NotificationDetailsPopup extends StatelessWidget {
+  final Map<String, dynamic> notification;
+  final GlobalKey _globalKey = GlobalKey();
+
+  NotificationDetailsPopup({super.key, required this.notification});
+
+  @override
+  Widget build(BuildContext context) {
+    DateTime createdAt = DateTime.parse(notification['created_at']);
+    String formattedDate = DateFormat('yyyy-MM-dd hh:mm a').format(createdAt);
+    String amount = notification['amount'];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          RepaintBoundary(
+            key: _globalKey,
+            child: Table(
+              border: TableBorder.all(color: Colors.grey),
+              children: [
+                TableRow(children: [
+                  const TableCell(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Invoice ID',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  TableCell(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(notification['invoice_id']),
+                    ),
+                  ),
+                ]),
+                TableRow(children: [
+                  const TableCell(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Risk Title',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  TableCell(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(notification['risk_title']),
+                    ),
+                  ),
+                ]),
+                TableRow(children: [
+                  const TableCell(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Amount',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  TableCell(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('৳ ${Translate.convertToBangla(amount)}'),
+                    ),
+                  ),
+                ]),
+                TableRow(children: [
+                  const TableCell(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Date',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  TableCell(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(formattedDate),
+                    ),
+                  ),
+                ]),
+                TableRow(children: [
+                  const TableCell(
+                    child: Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(
+                        'Status',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  TableCell(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(notification['status']),
+                    ),
+                  ),
+                ]),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: () async {
+              await Clipboard.setData(
+                ClipboardData(text: notification['invoice_id']),
+              );
+              // ignore: use_build_context_synchronously
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Invoice ID copied to clipboard!'),
+                ),
+              );
+            },
+            icon: const Icon(Icons.copy),
+            label: const Text('Copy'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
