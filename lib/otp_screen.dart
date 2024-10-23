@@ -1,10 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/main_screen.dart';
+import 'package:flutter_application/signup_screen.dart';
 import 'package:flutter_application/utils/constants/sizes.dart';
 import 'package:flutter_application/utils/constants/text_strings.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
@@ -29,9 +28,17 @@ class OTPScreenState extends State<OTPScreen> {
   bool _isOTPSent = false;
   int _countdown = 0;
   Timer? _timer;
+  late TextEditingController _phoneController;
+
+  @override
+  void initState() {
+    super.initState();
+    _phoneController = TextEditingController(text: widget.phoneNumber);
+  }
 
   Future<void> _verifyOTP(BuildContext context) async {
-    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/otp_verification');
+    final url =
+        Uri.https('lalpoolnetwork.net', '/api/v2/apps/otp_verification');
 
     try {
       AlertBuilder.showLoadingDialog(context);
@@ -40,9 +47,6 @@ class OTPScreenState extends State<OTPScreen> {
         url,
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
         body: jsonEncode(<String, dynamic>{
           'user_id': widget.userID,
@@ -66,9 +70,14 @@ class OTPScreenState extends State<OTPScreen> {
           Future.delayed(const Duration(seconds: 2), () {
             Navigator.pushReplacement(
               context,
-              // ignore: avoid_types_as_parameter_names
-              MaterialPageRoute(builder: (context) => MainScreen(onNavigateToPage: (int ) { return 1; },),
-            ));
+              MaterialPageRoute(
+                builder: (context) => MainScreen(
+                  onNavigateToPage: (int) {
+                    return 1;
+                  },
+                ),
+              ),
+            );
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -112,6 +121,7 @@ class OTPScreenState extends State<OTPScreen> {
         },
         body: jsonEncode(<String, dynamic>{
           'user_id': widget.userID,
+          'phone_number': _phoneController.text,
         }),
       );
 
@@ -138,7 +148,8 @@ class OTPScreenState extends State<OTPScreen> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Server error. Please try again later.')),
+          const SnackBar(
+              content: Text('Server error. Please try again later.')),
         );
       }
     } catch (e) {
@@ -162,9 +173,53 @@ class OTPScreenState extends State<OTPScreen> {
     });
   }
 
+  void _navigateToSignup() async {
+    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/delete_account', {
+      'phone': _phoneController.text,
+    });
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        // Assuming a successful response means account deletion is successful
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        if (responseData['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Existing Phone number Delete Successful')),
+          );
+
+          // Navigate to the SignUpScreen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const SignUpScreen(),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(responseData['message'] ?? 'Error occurred')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to delete account. Try again.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
+  }
+
   @override
   void dispose() {
     _timer?.cancel();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -180,7 +235,8 @@ class OTPScreenState extends State<OTPScreen> {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(TSizes.tDefaultSize).copyWith(
-                  bottom: MediaQuery.of(context).viewInsets.bottom + TSizes.tDefaultSize,
+                  bottom: MediaQuery.of(context).viewInsets.bottom +
+                      TSizes.tDefaultSize,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -200,6 +256,14 @@ class OTPScreenState extends State<OTPScreen> {
                     Text(
                       '${TTexts.tOtpMessage} ${widget.phoneNumber}\n',
                       textAlign: TextAlign.center,
+                    ),
+                    TextButton(
+                      onPressed: _navigateToSignup,
+                      child: const Text(
+                        'Change Phone',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.blue),
+                      ),
                     ),
                     if (!_isOTPSent)
                       TextButton(
