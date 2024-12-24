@@ -1,11 +1,11 @@
 name: flutter_application
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 
-version: 2.0.3
+version: 2.0.4
 
 environment:
-  sdk: '>=3.4.3 <4.0.0'
+  sdk: ">=3.4.3 <4.0.0"
 
 dependencies:
   flutter:
@@ -40,7 +40,7 @@ dependencies:
   percent_indicator: ^4.2.2
   lottie: ^2.7.0
   toast: ^0.3.0
-  ariyanpay: ^0.0.4
+  ariyanpay: ^0.0.5
   platform_device_id_web: ^1.0.0
   device_info: ^2.0.0
   platform_device_id_platform_interface: ^1.0.0
@@ -52,7 +52,9 @@ dependencies:
   settings_ui: ^2.0.2
   flutter_share: ^2.0.0
   path_provider: ^2.1.4
-  
+  flutter_internet_speed_test: ^1.0.1
+  webview_flutter: ^2.8.0
+  onesignal_flutter: ^5.2.9
 
 dev_dependencies:
   flutter_test:
@@ -77,4 +79,3 @@ flutter:
           weight: 400
         - asset: assets/fonts/Poppins-Bold.ttf
           weight: 800
-    

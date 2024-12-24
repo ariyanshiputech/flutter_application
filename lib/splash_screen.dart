@@ -24,7 +24,6 @@ class SplashScreenState extends State<SplashScreen> {
   bool isVerified = false;
   DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
 
-
   @override
   void initState() {
     super.initState();
@@ -34,7 +33,6 @@ class SplashScreenState extends State<SplashScreen> {
   Future<void> _initializeDeviceInfo() async {
     String? deviceId;
     try {
-
       if (kIsWeb) {
         deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
       } else if (Platform.isAndroid) {
@@ -46,7 +44,7 @@ class SplashScreenState extends State<SplashScreen> {
       } else {
         deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
       }
-      
+
       setState(() {
         deviceKey = deviceId;
       });
@@ -54,7 +52,7 @@ class SplashScreenState extends State<SplashScreen> {
         print(deviceKey);
       }
       verifyUser(deviceKey!);
-        } catch (e) {
+    } catch (e) {
       setState(() {
         deviceKey = 'Failed to get device ID';
       });
@@ -79,23 +77,27 @@ class SplashScreenState extends State<SplashScreen> {
 
         if (responseData['success'] == true) {
           GlobalData.userData = responseData['user'];
+          GlobalData.pppoeData = responseData['pppoe'];
           final String phoneNumber = responseData['user']['phone'];
           final int userID = responseData['user']['id'];
           setState(() {
             isVerified = true;
           });
-        Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute(
-            builder: (context) => responseData['user']['status'] == 1
-              // ignore: avoid_types_as_parameter_names
-              ?  MainScreen(onNavigateToPage: (int ) { return 1; },)
-              :  OTPScreen(phoneNumber: phoneNumber, userID: userID),
-          ),
-        );
-               
-           
+          Navigator.pushReplacement(
+            // ignore: use_build_context_synchronously
+            context,
+            MaterialPageRoute(
+              builder: (context) => responseData['user']['status'] == 1
+                  // ignore: avoid_types_as_parameter_names
+                  ? MainScreen(
+                      onNavigateToPage: (int) {
+                        return 1;
+                      },
+                    )
+                  : OTPScreen(phoneNumber: phoneNumber, userID: userID),
+            ),
+          );
+
           if (kDebugMode) {
             print(responseData['user']['status']);
           }

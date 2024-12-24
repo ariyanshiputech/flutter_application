@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
+import 'package:flutter_application/utils/snackbar_utils.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -62,14 +63,14 @@ class BuyHotspotScreenState extends State<BuyHotspotScreen> {
   void _calculateAmount() {
     final int validity = int.tryParse(validityController.text) ?? 0;
     final int hotPrice = GlobalData.resellerData?['hot_price'] ?? 0;
-    
+
     setState(() {
       if (kDebugMode) {
-      print(GlobalData.resellerData?['hot_price']);
-    }
+        print(GlobalData.resellerData?['hot_price']);
+      }
       amountController.text = (validity * hotPrice).toString();
-      isPaymentEnabled = amountController.text.isNotEmpty && int.parse(amountController.text) > 0;
-
+      isPaymentEnabled = amountController.text.isNotEmpty &&
+          int.parse(amountController.text) > 0;
     });
   }
 
@@ -80,7 +81,7 @@ class BuyHotspotScreenState extends State<BuyHotspotScreen> {
     setState(() {
       ipAddress = ip ?? 'Unknown IP Address';
     });
-      AlertBuilder.showLoadingDialog(context);
+    AlertBuilder.showLoadingDialog(context);
     try {
       final response = await http.post(
         url,
@@ -89,7 +90,7 @@ class BuyHotspotScreenState extends State<BuyHotspotScreen> {
         },
         body: jsonEncode(<String, dynamic>{
           'ipAddress': ipAddress,
-          'reseller_id' : GlobalData.userData?['reseller_id'],
+          'reseller_id': GlobalData.userData?['reseller_id'],
         }),
       );
 
@@ -110,26 +111,16 @@ class BuyHotspotScreenState extends State<BuyHotspotScreen> {
       } else {
         AlertBuilder.hideLoadingDialog(context);
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Opps!',
-                message: responseData['message'],
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
+
+        SnackbarUtils.showSnackBar(
+            context, 'Opps', responseData['message'], ContentType.failure);
         if (kDebugMode) {
           print('Failed to fetch data. Status code: ${response.statusCode}');
           print('Response body: ${response.body}');
         }
       }
     } catch (e) {
-        AlertBuilder.hideLoadingDialog(context);
+      AlertBuilder.hideLoadingDialog(context);
       if (kDebugMode) {
         print('Error occurred while fetching data: $e');
       }
@@ -200,19 +191,21 @@ class BuyHotspotScreenState extends State<BuyHotspotScreen> {
             ],
             backgroundColor: TColors.tPrimaryColor,
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(TSizes.tDefaultSize),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FormSection(
-                  ipAddressController: _ipAddressController,
-                  validityController: validityController,
-                  macController: macController, 
-                  amountController: amountController, 
-                  isPaymentEnabled: isPaymentEnabled, 
-                ),
-              ],
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(TSizes.tDefaultSize),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FormSection(
+                    ipAddressController: _ipAddressController,
+                    validityController: validityController,
+                    macController: macController,
+                    amountController: amountController,
+                    isPaymentEnabled: isPaymentEnabled,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -231,8 +224,9 @@ class FormSection extends StatefulWidget {
   const FormSection({
     super.key,
     required this.ipAddressController,
-    required this.macController, this.macAddress,
-    required this.validityController, 
+    required this.macController,
+    this.macAddress,
+    required this.validityController,
     required this.amountController,
     required this.isPaymentEnabled,
   });
@@ -243,88 +237,64 @@ class FormSection extends StatefulWidget {
 
 class FormSectionState extends State<FormSection> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  
+
   @override
   Widget build(BuildContext context) {
     final isPlatformDark =
         // ignore: deprecated_member_use
         WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
-    final initTheme = isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
+    final initTheme =
+        isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
 
-void proccessPayment(dynamic data) async {
-  final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/proccess_online_hotspot');
-  
-  try {
-    final response = await http.post(
-      url,
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-      body: jsonEncode(<dynamic, dynamic>{
-        'invoice_id': data.invoiceId,
-        'reseller_id': GlobalData.userData?['reseller_id'],
-        'user_id': GlobalData.userData?['id'],
-        'device_key': data.valueA,
-        'amount': data.amount,
-        'hotspot_sell_price': data.valueD,
-        'validity': data.valueG,
-        'mac_address': data.valueC,
-        
-      }),
-    );
-    final Map<String, dynamic> responseData = jsonDecode(response.body);
-    if (response.statusCode == 200) {
-        GlobalData.userData = responseData['user'];
-      // Show success message
-      final snackBar = SnackBar(
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        content: AwesomeSnackbarContent(
-          title: 'Success!',
-          message: responseData['message'],
-          contentType: ContentType.success,
-        ),
-      );
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(snackBar);
-    } else {
-      // Show failure message
-      final snackBar = SnackBar(
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        content: AwesomeSnackbarContent(
-          title: 'Failed!',
-          message: responseData['message'],
-          contentType: ContentType.failure,
-        ),
-      );
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(snackBar);
-    }
-  } catch (e) {
-    final snackBar = SnackBar(
-      elevation: 0,
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: Colors.transparent,
-      content: AwesomeSnackbarContent(
-        title: 'Error!',
-        message: 'An error occurred: $e',
-        contentType: ContentType.failure,
-      ),
-    );
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(snackBar);
+    void proccessPayment(dynamic data) async {
+      final url = Uri.https(
+          'lalpoolnetwork.net', '/api/v2/apps/proccess_online_hotspot');
 
-    if (kDebugMode) {
-      print('Error occurred while processing payment: $e');
+      try {
+        final response = await http.post(
+          url,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<dynamic, dynamic>{
+            'invoice_id': data.invoiceId,
+            'reseller_id': GlobalData.userData?['reseller_id'],
+            'user_id': GlobalData.userData?['id'],
+            'device_key': data.valueA,
+            'amount': data.amount,
+            'hotspot_sell_price': data.valueD,
+            'validity': data.valueG,
+            'mac_address': data.valueC,
+          }),
+        );
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          GlobalData.userData = responseData['user'];
+          SnackbarUtils.showSnackBar(
+              context, 'Success', responseData['message'], ContentType.success);
+          // Show success message
+        } else {
+          // Show failure message
+          SnackbarUtils.showSnackBar(
+            context,
+            'Error',
+            responseData['message'],
+            ContentType.failure,
+          );
+        }
+      } catch (e) {
+        SnackbarUtils.showSnackBar(
+          context,
+          'Error',
+          'An error occurred: $e',
+          ContentType.failure,
+        );
+
+        if (kDebugMode) {
+          print('Error occurred while processing payment: $e');
+        }
+      }
     }
-  }
-}
 
     return Center(
       child: ThemeProvider(
@@ -407,66 +377,56 @@ void proccessPayment(dynamic data) async {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: widget.isPaymentEnabled ? () async {
-                        if (_formKey.currentState!.validate()) {
-                          try {
-                            AlertBuilder.showLoadingDialog(context);
-                            final response =
-                                await Ariyanpay.createPayment(
-                              context: context,
-                              customer: CustomerDetails(
-                                fullName: GlobalData.userData?['name'],
-                                cusPhone: GlobalData.userData?['phone'],
-                              ),
-                              amount: widget.amountController.text,
-                              valueA: GlobalData.userData?['device_key'],
-                              valueB: widget.ipAddressController.text,
-                              valueC: widget.macController.text,
-                              valueD: GlobalData.resellerData?['hotspot_sell_price'],
-                              valueE: GlobalData.userData?['reseller_id'],
-                              valueF: GlobalData.userData?['id'],
-                              valueG: widget.validityController.text,
-                            );
-                            AlertBuilder.hideLoadingDialog(context);
+                      onPressed: widget.isPaymentEnabled
+                          ? () async {
+                              if (_formKey.currentState!.validate()) {
+                                try {
+                                  AlertBuilder.showLoadingDialog(context);
+                                  final response =
+                                      await Ariyanpay.createPayment(
+                                    context: context,
+                                    customer: CustomerDetails(
+                                      fullName: GlobalData.userData?['name'],
+                                      cusPhone: GlobalData.userData?['phone'],
+                                    ),
+                                    amount: widget.amountController.text,
+                                    valueA: GlobalData.userData?['device_key'],
+                                    valueB: widget.ipAddressController.text,
+                                    valueC: widget.macController.text,
+                                    valueD: GlobalData
+                                        .resellerData?['hotspot_sell_price'],
+                                    valueE: GlobalData.userData?['reseller_id'],
+                                    valueF: GlobalData.userData?['id'],
+                                    valueG: widget.validityController.text,
+                                  );
+                                  AlertBuilder.hideLoadingDialog(context);
 
-                            if (response.status == ResponseStatus.completed) {
-                              proccessPayment(response);
-                            } else if (response.status ==
-                                ResponseStatus.canceled) {
-                                  final snackBar = SnackBar(
-                                        elevation: 0,
-                                        behavior: SnackBarBehavior.floating,
-                                        backgroundColor: Colors.transparent,
-                                        content: AwesomeSnackbarContent(
-                                          title: 'Opps!',
-                                          message: 'Payment Canceled',
-                                          contentType: ContentType.failure,
-                                        ),
-                                      );
-                                      ScaffoldMessenger.of(context)
-                                        ..hideCurrentSnackBar()
-                                        ..showSnackBar(snackBar);
-                            } else if (response.status ==
-                                ResponseStatus.pending) {
-                              final snackBar = SnackBar(
-                                        elevation: 0,
-                                        behavior: SnackBarBehavior.floating,
-                                        backgroundColor: Colors.transparent,
-                                        content: AwesomeSnackbarContent(
-                                          title: 'Opps!',
-                                          message: 'Payment Pending',
-                                          contentType: ContentType.failure,
-                                        ),
-                                      );
-                                      ScaffoldMessenger.of(context)
-                                        ..hideCurrentSnackBar()
-                                        ..showSnackBar(snackBar);
+                                  if (response.status ==
+                                      ResponseStatus.completed) {
+                                    proccessPayment(response);
+                                  } else if (response.status ==
+                                      ResponseStatus.canceled) {
+                                    SnackbarUtils.showSnackBar(
+                                      context,
+                                      'Error',
+                                      'Payment Canceled',
+                                      ContentType.failure,
+                                    );
+                                  } else if (response.status ==
+                                      ResponseStatus.pending) {
+                                    SnackbarUtils.showSnackBar(
+                                      context,
+                                      'Error',
+                                      'Payment Pending',
+                                      ContentType.failure,
+                                    );
+                                  }
+                                } catch (e) {
+                                  snackBar('An error occurred: $e', context);
+                                }
+                              }
                             }
-                          } catch (e) {
-                            snackBar('An error occurred: $e', context);
-                          }
-                        }
-                       } : null, // Disable button if isPaymentEnabled is false
+                          : null, // Disable button if isPaymentEnabled is false
                       child: const Text("PAYMENT NOW"),
                     ),
                   ),

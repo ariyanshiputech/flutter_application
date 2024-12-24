@@ -89,7 +89,8 @@ class SignUpScreenState extends State<SignUpScreen> {
   }
 
   String _generateRandomString(int length) {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     final rnd = Random();
     return String.fromCharCodes(Iterable.generate(
         length, (_) => chars.codeUnitAt(rnd.nextInt(chars.length))));
@@ -97,7 +98,8 @@ class SignUpScreenState extends State<SignUpScreen> {
 
   Future<String> _getWebIpAddress() async {
     try {
-      final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
+      final response =
+          await http.get(Uri.parse('https://api.ipify.org?format=json'));
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         return data['ip'] ?? 'Unknown IP Address';
@@ -111,7 +113,8 @@ class SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedImage != null) {
       setState(() {
@@ -120,7 +123,8 @@ class SignUpScreenState extends State<SignUpScreen> {
     }
   }
 
-  Future<void> _submitForm(String name, String phoneNo, String appId) async { // Updated
+  Future<void> _submitForm(String name, String phoneNo, String appId) async {
+    // Updated
     setState(() {
       _isSubmitting = true;
     });
@@ -146,7 +150,8 @@ class SignUpScreenState extends State<SignUpScreen> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, dynamic>{ // Updated
+        body: jsonEncode(<String, dynamic>{
+          // Updated
           'name': name,
           'phoneNo': phoneNo,
           'appId': appId, // Added
@@ -155,7 +160,7 @@ class SignUpScreenState extends State<SignUpScreen> {
           if (base64Image != null) 'profileImage': base64Image,
         }),
       );
-      
+
       // Hide the loading dialog
       // ignore: use_build_context_synchronously
       AlertBuilder.hideLoadingDialog(context);
@@ -169,7 +174,8 @@ class SignUpScreenState extends State<SignUpScreen> {
             // ignore: use_build_context_synchronously
             context,
             MaterialPageRoute(
-              builder: (context) => OTPScreen(phoneNumber: phoneNumber, userID: userID),
+              builder: (context) =>
+                  OTPScreen(phoneNumber: phoneNumber, userID: userID),
             ),
           );
         }
@@ -211,8 +217,8 @@ class SignUpScreenState extends State<SignUpScreen> {
               ..showSnackBar(snackBar);
           }
 
-      if (response.statusCode == 401) {
-           final snackBar = SnackBar(
+          if (response.statusCode == 401) {
+            final snackBar = SnackBar(
               elevation: 0,
               behavior: SnackBarBehavior.floating,
               backgroundColor: Colors.transparent,
@@ -254,81 +260,84 @@ class SignUpScreenState extends State<SignUpScreen> {
       builder: (context) {
         return SafeArea(
           child: Scaffold(
-            body: SingleChildScrollView(
-              child: Container(
-                padding: const EdgeInsets.all(TSizes.tDefaultSize),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FormHeaderWidget(
-                      image: TImages.darkAppLogo,
-                      title: TTexts.tSignUpTitle,
-                      subTitle: TTexts.tSignUpSubTitle,
-                      imageHeight: 0.15,
-                      isAvatarPresent: true,
-                      avatar: _profileImage != null
-                          ? GestureDetector(
-                              onTap: _pickImage,
-                              child: Stack(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 50,
-                                    backgroundImage: FileImage(_profileImage!),
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(3),
-                                      decoration: const BoxDecoration(
-                                        color: TColors.tPrimaryColor,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.edit,
-                                        color: Colors.white,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Container(
+                  padding: const EdgeInsets.all(TSizes.tDefaultSize),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FormHeaderWidget(
+                        image: TImages.darkAppLogo,
+                        title: TTexts.tSignUpTitle,
+                        subTitle: TTexts.tSignUpSubTitle,
+                        imageHeight: 0.15,
+                        isAvatarPresent: true,
+                        avatar: _profileImage != null
+                            ? GestureDetector(
+                                onTap: _pickImage,
+                                child: Stack(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 50,
+                                      backgroundImage:
+                                          FileImage(_profileImage!),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: const BoxDecoration(
+                                          color: TColors.tPrimaryColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.edit,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : GestureDetector(
-                              onTap: _pickImage,
-                              child: Stack(
-                                children: [
-                                  const CircleAvatar(
-                                    radius: 50,
-                                    backgroundImage: AssetImage(TImages.user),
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.all(3),
-                                      decoration: const BoxDecoration(
-                                        color: TColors.tPrimaryColor,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: const Icon(
-                                        Icons.edit,
-                                        color: Colors.white,
+                                  ],
+                                ),
+                              )
+                            : GestureDetector(
+                                onTap: _pickImage,
+                                child: Stack(
+                                  children: [
+                                    const CircleAvatar(
+                                      radius: 50,
+                                      backgroundImage: AssetImage(TImages.user),
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      right: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(3),
+                                        decoration: const BoxDecoration(
+                                          color: TColors.tPrimaryColor,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.edit,
+                                          color: Colors.white,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                    ),
-                    FormSection(
-                      deviceKeyController: _deviceKeyController,
-                      ipAddressController: _ipAddressController,
-                      onSubmit: _submitForm,
-                      nameErrorMessage: _nameErrorMessage,
-                      phoneErrorMessage: _phoneErrorMessage,
-                      isSubmitting: _isSubmitting,
-                    ),
-                  ],
+                      ),
+                      FormSection(
+                        deviceKeyController: _deviceKeyController,
+                        ipAddressController: _ipAddressController,
+                        onSubmit: _submitForm,
+                        nameErrorMessage: _nameErrorMessage,
+                        phoneErrorMessage: _phoneErrorMessage,
+                        isSubmitting: _isSubmitting,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -364,7 +373,8 @@ class FormSection extends StatefulWidget {
 class FormSectionState extends State<FormSection> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController phoneNoController = TextEditingController();
-  final TextEditingController appIdController = TextEditingController(); // Added
+  final TextEditingController appIdController =
+      TextEditingController(); // Added
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? nameError;
   String? phoneError;
@@ -394,8 +404,11 @@ class FormSectionState extends State<FormSection> {
   @override
   Widget build(BuildContext context) {
     // ignore: deprecated_member_use
-    final isPlatformDark = WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
-    final initTheme = isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
+    final isPlatformDark =
+        // ignore: deprecated_member_use
+        WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+    final initTheme =
+        isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
     return ThemeProvider(
       initTheme: initTheme,
       builder: (_, myTheme) {
@@ -413,7 +426,8 @@ class FormSectionState extends State<FormSection> {
                     prefixIcon: const Icon(Icons.person_outline_rounded),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide(color: nameError != null ? Colors.red : Colors.grey),
+                      borderSide: BorderSide(
+                          color: nameError != null ? Colors.red : Colors.grey),
                     ),
                   ),
                 ),

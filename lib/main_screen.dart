@@ -11,8 +11,10 @@ import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/home_screen.dart';
 import 'package:flutter_application/notification_screen.dart';
+import 'package:flutter_application/pppoe/pppoe_home_screen.dart';
 import 'package:flutter_application/settings_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
+import 'package:flutter_application/utils/snackbar_utils.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:http/http.dart' as http;
@@ -39,14 +41,45 @@ class MainScreenState extends State<MainScreen> {
   }
 
   @override
-  void initState()
-  {
+  void initState() {
     super.initState();
-    _fetchData(); 
+    final version = GlobalData.userData?['version'];
+    if (version == 0 || version == '0' || version == false) {
+      _fetchData();
+    } else {
+      _getPppoeInfo();
+    }
   }
- @override
-  void dispose() {
-    super.dispose();
+
+  Future<void> _getPppoeInfo() async {
+    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/get_pppoe_info');
+
+    try {
+      // Replace 'YOUR_APP_ID' with the actual app ID you need to send.
+      final response = await http.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'app_id': GlobalData
+              .userData?['app_id'], // Assuming you have app ID in GlobalData
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        setState(() {
+          GlobalData.pppoeData = responseData['pppoe'];
+          // Optionally update other state variables based on the fetched data
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching PPPoE Info: $e');
+      }
+    }
   }
 
   Future<void> _fetchData() async {
@@ -68,7 +101,7 @@ class MainScreenState extends State<MainScreen> {
         },
         body: jsonEncode(<String, dynamic>{
           'ipAddress': ipAddress,
-          'reseller_id' : GlobalData.userData?['reseller_id'],
+          'reseller_id': GlobalData.userData?['reseller_id'],
         }),
       );
 
@@ -81,37 +114,27 @@ class MainScreenState extends State<MainScreen> {
           // Optionally update other state variables based on the fetched data
         });
 
-        
-
         if (kDebugMode) {
           print('Data fetched successfully');
           print('Response body: ${response.body}');
         }
       } else {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Opps!',
-                message: responseData['message'],
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
+        // For error:
+        SnackbarUtils.showSnackBar(
+          context,
+          'Error',
+          responseData['message'],
+          ContentType.failure,
+        );
         if (kDebugMode) {
           print('Failed to fetch data. Status code: ${response.statusCode}');
           print('Response body: ${response.body}');
         }
       }
     } catch (e) {
-      if (mounted) 
-      {
+      if (mounted) {
         AlertBuilder.hideLoadingDialog(context);
-
       } // Add this check to ensure the widget is still mounted
       if (kDebugMode) {
         print('Error occurred while fetching data: $e');
@@ -119,7 +142,7 @@ class MainScreenState extends State<MainScreen> {
     }
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return ThemeSwitchingArea(
       child: Builder(
@@ -157,12 +180,38 @@ class MainScreenState extends State<MainScreen> {
   Widget _getPageContent(int page) {
     switch (page) {
       case 0:
-        return HomeScreen(onNavigateToPage: updatePage);
+        if (kDebugMode) {
+          print("Version: ${GlobalData.userData?['version']}");
+        }
+
+        // Retrieve the version from GlobalData
+        final version = GlobalData.userData?['version'];
+
+        // Determine the version type and return appropriate screen
+        if (version == 1 || version == '1' || version == true) {
+          // If version indicates PPPOE Home Screen
+          return PppoeHomeScreen(onNavigateToPage: updatePage);
+        } else if (version == 0 || version == '0' || version == false) {
+          // If version indicates standard Home Screen
+          return HomeScreen(onNavigateToPage: updatePage);
+        } else {
+          // Fallback for invalid or null version
+          if (kDebugMode) {
+            print("Fallback to HomeScreen: Version is invalid or null.");
+          }
+          return HomeScreen(onNavigateToPage: updatePage);
+        }
+
       case 1:
-      return SettingsScreen(onNavigateToPage: updatePage);
+        // Return the Settings screen
+        return SettingsScreen(onNavigateToPage: updatePage);
+
       case 2:
-      return NotificationScreen(onNavigateToPage: updatePage);
+        // Return the Notifications screen
+        return NotificationScreen(onNavigateToPage: updatePage);
+
       default:
+        // Return a 404 message for undefined pages
         return const Text('404 Page');
     }
   }

@@ -54,6 +54,7 @@ class OTPScreenState extends State<OTPScreen> {
         }),
       );
 
+      // ignore: use_build_context_synchronously
       AlertBuilder.hideLoadingDialog(context);
 
       if (response.statusCode == 200 || response.statusCode == 201) {

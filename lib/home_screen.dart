@@ -36,7 +36,8 @@ class HomeScreen extends StatefulWidget {
 class HomeScreenState extends State<HomeScreen> {
   int currentPage = 1; // Set to 1 for Profile tab
   GlobalKey bottomNavigationKey = GlobalKey();
-  int endTime = DateTime.parse(GlobalData.userData?['expire_date']).millisecondsSinceEpoch;
+  int endTime = DateTime.parse(GlobalData.userData?['expire_date'])
+      .millisecondsSinceEpoch;
   bool _isPressed = false;
   bool lottieAnimate = false;
   String? ipAddress;
@@ -49,23 +50,22 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _checkForUpdates() async {
-  try {
-    final updateInfo = await InAppUpdate.checkForUpdate();
+    try {
+      final updateInfo = await InAppUpdate.checkForUpdate();
 
-    if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
-      // Perform a flexible update
-      await InAppUpdate.startFlexibleUpdate().then((_) {
-        // Complete the update after download
-        InAppUpdate.completeFlexibleUpdate();
-      });
-    }
-  } catch (e) {
-    if (kDebugMode) {
-      print('Failed to check for updates: $e');
+      if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
+        // Perform a flexible update
+        await InAppUpdate.startFlexibleUpdate().then((_) {
+          // Complete the update after download
+          InAppUpdate.completeFlexibleUpdate();
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Failed to check for updates: $e');
+      }
     }
   }
-}
-
 
   Future<void> _getIPAddress() async {
     final NetworkInfo networkInfo = NetworkInfo();
@@ -104,10 +104,9 @@ class HomeScreenState extends State<HomeScreen> {
               child: CircleAvatar(
                 backgroundImage: decodedBytes != null
                     ? MemoryImage(decodedBytes)
-                    : const AssetImage(TImages.placeholderimage) as ImageProvider,
-                onBackgroundImageError: (_, __) {
-                  
-                },
+                    : const AssetImage(TImages.placeholderimage)
+                        as ImageProvider,
+                onBackgroundImageError: (_, __) {},
               ),
             ),
           ),
@@ -137,151 +136,165 @@ class HomeScreenState extends State<HomeScreen> {
               },
             ),
           ],
-          backgroundColor: TColors.tPrimaryColor, // Set AppBar background color to the theme's primary color
+          backgroundColor: TColors
+              .tPrimaryColor, // Set AppBar background color to the theme's primary color
         ),
-        body: SingleChildScrollView(
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 8.0),
-                LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    return FittedBox(
-                      child: Center(
-                        child: CountdownTimer(
-                          endTime: endTime,
-                          widgetBuilder: (_, time) {
-                            if (time == null) {
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _buildTimeBox(0, 'দিন', TColors.tDaysColor),
-                                  _buildTimeBox(0, 'ঘন্টা', TColors.tHoursColor),
-                                  _buildTimeBox(0, 'মিনিট', TColors.tMinutesColor),
-                                  _buildTimeBox(0, 'সেকেন্ড', TColors.tSecondsColor),
-                                ],
-                              );
-                            } else {
-                              return Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _buildTimeBox(time.days, 'দিন', TColors.tDaysColor),
-                                  _buildTimeBox(time.hours, 'ঘন্টা', TColors.tHoursColor),
-                                  _buildTimeBox(time.min, 'মিনিট', TColors.tMinutesColor),
-                                  _buildTimeBox(time.sec, 'সেকেন্ড', TColors.tSecondsColor),
-                                ],
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 8.0),
-                Padding(
-                  padding: const EdgeInsets.all(15.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: _buildCustomImageButton(
-                              TImages.buyHotsot,
-                              () {
-                                setState(() {
-                                  _isPressed = !_isPressed;
-                                });
-
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const BuyHotspotScreen(),
-                                  ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 8.0),
+                  LayoutBuilder(
+                    builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                      return FittedBox(
+                        child: Center(
+                          child: CountdownTimer(
+                            endTime: endTime,
+                            widgetBuilder: (_, time) {
+                              if (time == null) {
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _buildTimeBox(0, 'দিন', TColors.tDaysColor),
+                                    _buildTimeBox(
+                                        0, 'ঘন্টা', TColors.tHoursColor),
+                                    _buildTimeBox(
+                                        0, 'মিনিট', TColors.tMinutesColor),
+                                    _buildTimeBox(
+                                        0, 'সেকেন্ড', TColors.tSecondsColor),
+                                  ],
                                 );
-
-                                if (kDebugMode) {
-                                  print('Buy HotSpot Button Press');
-                                }
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 25.0),
-                          Expanded(
-                            child: _buildCustomImageButton(
-                              TImages.cardRecharge,
-                              () {
-                                setState(() {
-                                  _isPressed = !_isPressed;
-                                });
-
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const CardRechargeScreen(),
-                                  ),
+                              } else {
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _buildTimeBox(
+                                        time.days, 'দিন', TColors.tDaysColor),
+                                    _buildTimeBox(time.hours, 'ঘন্টা',
+                                        TColors.tHoursColor),
+                                    _buildTimeBox(time.min, 'মিনিট',
+                                        TColors.tMinutesColor),
+                                    _buildTimeBox(time.sec, 'সেকেন্ড',
+                                        TColors.tSecondsColor),
+                                  ],
                                 );
-
-                                if (kDebugMode) {
-                                  print('Custom Image Button Pressed');
-                                }
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16.0),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12.0),
-                          border: Border.all(
-                            color: Colors.blue, // Set the border color here
-                            width: 1.0, // Optionally set the width of the border
+                              }
+                            },
                           ),
                         ),
-                        constraints: const BoxConstraints(minHeight: 300), // Set minimum height here
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8.0),
+                  Padding(
+                    padding: const EdgeInsets.all(15.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const SizedBox(height: 8.0),
-                            const Text(
-                              'মেয়াদ থাকার পরেও ওয়াইপাই না চললে\nনিচের বাটনে চাপ দিন।',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontFamily: 'Bangla',
-                                fontSize: 16.0, // Adjust the font size as needed
-                                fontWeight: FontWeight.bold,
+                            Expanded(
+                              child: _buildCustomImageButton(
+                                TImages.buyHotsot,
+                                () {
+                                  setState(() {
+                                    _isPressed = !_isPressed;
+                                  });
+
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const BuyHotspotScreen(),
+                                    ),
+                                  );
+
+                                  if (kDebugMode) {
+                                    print('Buy HotSpot Button Press');
+                                  }
+                                },
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  lottieAnimate = true;
-                                });
-                                _connectWifi();
-                                if (kDebugMode) {
-                                  print('Lottie Button Pressed');
-                                }
-                              },
-                              child: Lottie.asset(
-                                'assets/logos/connect.json',
-                                height: 200,
-                                animate: lottieAnimate,
-                                repeat: true
+                            const SizedBox(width: 25.0),
+                            Expanded(
+                              child: _buildCustomImageButton(
+                                TImages.cardRecharge,
+                                () {
+                                  setState(() {
+                                    _isPressed = !_isPressed;
+                                  });
+
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const CardRechargeScreen(),
+                                    ),
+                                  );
+
+                                  if (kDebugMode) {
+                                    print('Custom Image Button Pressed');
+                                  }
+                                },
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      // Add more rows of buttons if needed
-                    ],
+                        const SizedBox(height: 16.0),
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12.0),
+                            border: Border.all(
+                              color: Colors.blue, // Set the border color here
+                              width:
+                                  1.0, // Optionally set the width of the border
+                            ),
+                          ),
+                          constraints: const BoxConstraints(
+                              minHeight: 300), // Set minimum height here
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 8.0),
+                              const Text(
+                                'মেয়াদ থাকার পরেও ওয়াইপাই না চললে\nনিচের বাটনে চাপ দিন।',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: 'Bangla',
+                                  fontSize:
+                                      16.0, // Adjust the font size as needed
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    lottieAnimate = true;
+                                  });
+                                  _connectWifi();
+                                  if (kDebugMode) {
+                                    print('Lottie Button Pressed');
+                                  }
+                                },
+                                child: Lottie.asset('assets/logos/connect.json',
+                                    height: 200,
+                                    animate: lottieAnimate,
+                                    repeat: true),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Add more rows of buttons if needed
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -294,7 +307,10 @@ class HomeScreenState extends State<HomeScreen> {
     final resellerId = GlobalData.userData?['reseller_id'];
     final userId = GlobalData.userData?['id'];
 
-    if (ipAddress != null && deviceKey != null && resellerId != null && userId != null) {
+    if (ipAddress != null &&
+        deviceKey != null &&
+        resellerId != null &&
+        userId != null) {
       setState(() {
         lottieAnimate = true;
       });
@@ -314,7 +330,7 @@ class HomeScreenState extends State<HomeScreen> {
         },
         body: jsonEncode(<String, dynamic>{
           'device_key': GlobalData.userData?['device_key'],
-          'reseller_id':  GlobalData.userData?['reseller_id'],
+          'reseller_id': GlobalData.userData?['reseller_id'],
           'user_id': GlobalData.userData?['id'],
           'hotspot_mikrotik': GlobalData.resellerData?['hotspot_mikrotik'],
           'mac_address': GlobalData.resellerData?['mac_address'],
@@ -328,19 +344,18 @@ class HomeScreenState extends State<HomeScreen> {
 
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Yeah!',
-                message: responseData['message'],
-                contentType: ContentType.success,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
-       
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Yeah!',
+            message: responseData['message'],
+            contentType: ContentType.success,
+          ),
+        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
       } else {
         setState(() {
           lottieAnimate = false;
@@ -349,19 +364,19 @@ class HomeScreenState extends State<HomeScreen> {
         if (kDebugMode) {
           print(responseData);
         }
-       final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Opps!',
-                message: responseData['message'],
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
+        final snackBar = SnackBar(
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.transparent,
+          content: AwesomeSnackbarContent(
+            title: 'Opps!',
+            message: responseData['message'],
+            contentType: ContentType.failure,
+          ),
+        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(snackBar);
       }
     } else {
       setState(() {
@@ -369,19 +384,18 @@ class HomeScreenState extends State<HomeScreen> {
       });
 
       final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Opps!',
-                message: 'Missing required information.',
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
-      
+        elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: Colors.transparent,
+        content: AwesomeSnackbarContent(
+          title: 'Opps!',
+          message: 'Missing required information.',
+          contentType: ContentType.failure,
+        ),
+      );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(snackBar);
     }
   }
 
@@ -430,9 +444,14 @@ class HomeScreenState extends State<HomeScreen> {
           lineWidth: 5.0,
           percent: percent,
           center: Text(
-            time == 0 ? '০০\n$label' : '${Translate.convertToBangla(time!)}\n$label',
+            time == 0
+                ? '০০\n$label'
+                : '${Translate.convertToBangla(time!)}\n$label',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: 'Bangla'),
+            style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Bangla'),
           ),
           progressColor: color,
           backgroundColor: time == 0 ? color : Colors.grey[200]!,

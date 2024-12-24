@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/global_data.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
+import 'package:flutter_application/utils/snackbar_utils.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -33,10 +34,10 @@ class ProfileScreenState extends State<ProfileScreen> {
     super.initState();
   }
 
- 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedImage != null) {
       setState(() {
@@ -45,7 +46,7 @@ class ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _submitForm(String name) async {
+  Future<void> _submitForm(String name, String appid) async {
     setState(() {
       _isSubmitting = true;
     });
@@ -70,6 +71,7 @@ class ProfileScreenState extends State<ProfileScreen> {
         },
         body: jsonEncode(<String, dynamic>{
           'name': name,
+          'app_id': appid,
           'user_id': GlobalData.userData?['id'],
           if (base64Image != null) 'profileImage': base64Image,
         }),
@@ -83,22 +85,9 @@ class ProfileScreenState extends State<ProfileScreen> {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         if (responseData['success'] == true) {
           GlobalData.userData = responseData['user'];
-          final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Yeah!',
-                message: responseData['message'],
-                contentType: ContentType.success,
-              ),
-            );
-            // ignore: use_build_context_synchronously
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
-          
-         
+
+          SnackbarUtils.showSnackBar(
+              context, 'Yeah!', responseData['message'], ContentType.success);
         }
       } else {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -106,19 +95,8 @@ class ProfileScreenState extends State<ProfileScreen> {
           _nameErrorMessage = responseData['errors']?['name']?.first ?? '';
 
           if (_nameErrorMessage.isNotEmpty) {
-            final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: '',
-                message: _nameErrorMessage,
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
+            SnackbarUtils.showSnackBar(
+                context, '', _nameErrorMessage, ContentType.failure);
           }
         });
 
@@ -158,7 +136,7 @@ class ProfileScreenState extends State<ProfileScreen> {
 
     // Decode the base64 string to bytes, or use null if it's not available
     Uint8List? decodedBytes;
-     if (base64Image != null && base64Image.isNotEmpty) {
+    if (base64Image != null && base64Image.isNotEmpty) {
       decodedBytes = base64Decode(base64Image);
     }
 
@@ -206,52 +184,54 @@ class ProfileScreenState extends State<ProfileScreen> {
             ],
             backgroundColor: TColors.tPrimaryColor,
           ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(TSizes.tDefaultSize),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: GestureDetector(
-                    onTap: _pickImage,
-                    child: Stack(
-                      children: [
-                       CircleAvatar(
-                          radius: 50,
-                          backgroundImage: _profileImage != null
-                            ? FileImage(_profileImage!)
-                            : (decodedBytes != null
-                                ? MemoryImage(decodedBytes)
-                                : const AssetImage(TImages.placeholderimage)), // Ensure `decodedBytes` is non-nullable
-                          onBackgroundImageError: (_, __) {},
-                        ),
-
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(3),
-                            decoration: const BoxDecoration(
-                              color: TColors.tPrimaryColor,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.edit,
-                              color: Colors.white,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(TSizes.tDefaultSize),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: GestureDetector(
+                      onTap: _pickImage,
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundImage: _profileImage != null
+                                ? FileImage(_profileImage!)
+                                : (decodedBytes != null
+                                    ? MemoryImage(decodedBytes)
+                                    : const AssetImage(TImages
+                                        .placeholderimage)), // Ensure `decodedBytes` is non-nullable
+                            onBackgroundImageError: (_, __) {},
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(3),
+                              decoration: const BoxDecoration(
+                                color: TColors.tPrimaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                FormSection(
-                  onSubmit: _submitForm,
-                  nameErrorMessage: _nameErrorMessage,
-                  isSubmitting: _isSubmitting,
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  FormSection(
+                    onSubmit: _submitForm,
+                    nameErrorMessage: _nameErrorMessage,
+                    isSubmitting: _isSubmitting,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -261,7 +241,7 @@ class ProfileScreenState extends State<ProfileScreen> {
 }
 
 class FormSection extends StatefulWidget {
-  final Future<void> Function(String) onSubmit;
+  final Future<void> Function(String, String) onSubmit;
   final String nameErrorMessage;
   final bool isSubmitting;
 
@@ -277,7 +257,10 @@ class FormSection extends StatefulWidget {
 }
 
 class FormSectionState extends State<FormSection> {
-  final TextEditingController nameController = TextEditingController(text: GlobalData.userData?["name"]); // Default value 'hi'
+  final TextEditingController nameController = TextEditingController(
+      text: GlobalData.userData?["name"]); // Default value 'hi'
+  final TextEditingController appidController =
+      TextEditingController(text: GlobalData.userData?["app_id"]);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? nameError;
 
@@ -300,8 +283,11 @@ class FormSectionState extends State<FormSection> {
   @override
   Widget build(BuildContext context) {
     // ignore: deprecated_member_use
-    final isPlatformDark = WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
-    final initTheme = isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
+    final isPlatformDark =
+        // ignore: deprecated_member_use
+        WidgetsBinding.instance.window.platformBrightness == Brightness.dark;
+    final initTheme =
+        isPlatformDark ? TAppTheme.darkTheme : TAppTheme.lightTheme;
 
     return Center(
       child: ThemeProvider(
@@ -321,7 +307,29 @@ class FormSectionState extends State<FormSection> {
                       prefixIcon: const Icon(Icons.person_outline_rounded),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide(color: nameError != null ? Colors.red : Colors.grey),
+                        borderSide: BorderSide(
+                            color:
+                                nameError != null ? Colors.red : Colors.grey),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Name cannot be empty';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  TextFormField(
+                    controller: appidController,
+                    decoration: InputDecoration(
+                      label: const Text("App ID"), // Added
+                      prefixIcon: const Icon(Icons.apps), // Added
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        borderSide: BorderSide(
+                            color:
+                                nameError != null ? Colors.red : Colors.grey),
                       ),
                     ),
                     validator: (value) {
@@ -340,7 +348,8 @@ class FormSectionState extends State<FormSection> {
                           setState(() {
                             nameError = null;
                           });
-                          await widget.onSubmit(nameController.text);
+                          await widget.onSubmit(
+                              nameController.text, appidController.text);
                         }
                       },
                       child: const Text("UPDATE"),

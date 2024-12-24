@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/global_data.dart';
+import 'package:flutter_application/main_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/snackbar_utils.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
@@ -15,20 +16,15 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_application/utils/constants/sizes.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
-import 'main_screen.dart';
-
-class CardRechargeScreen extends StatefulWidget {
-  const CardRechargeScreen({super.key});
+class PayBillScreen extends StatefulWidget {
+  const PayBillScreen({super.key});
 
   @override
-  CardRechargeScreenState createState() => CardRechargeScreenState();
+  PayBillScreenState createState() => PayBillScreenState();
 }
 
-class CardRechargeScreenState extends State<CardRechargeScreen> {
+class PayBillScreenState extends State<PayBillScreen> {
   final TextEditingController cardController = TextEditingController();
-  final TextEditingController _ipAddressController = TextEditingController();
-  final TextEditingController macController = TextEditingController();
-  String? ipAddress;
 
   @override
   void initState() {
@@ -37,7 +33,6 @@ class CardRechargeScreenState extends State<CardRechargeScreen> {
     }
 
     super.initState();
-    _getIPAddress();
     _fetchData();
 
     // Add listener to validityController
@@ -46,18 +41,15 @@ class CardRechargeScreenState extends State<CardRechargeScreen> {
   @override
   void dispose() {
     cardController.dispose();
-    _ipAddressController.dispose();
-    macController.dispose();
     super.dispose();
   }
 
   Future<void> _fetchData() async {
-    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/get_info');
+    final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/get_pppoe_info');
     final NetworkInfo networkInfo = NetworkInfo();
+    // ignore: unused_local_variable
     String? ip = await networkInfo.getWifiIP();
-    setState(() {
-      ipAddress = ip ?? 'Unknown IP Address';
-    });
+
     try {
       AlertBuilder.showLoadingDialog(context);
       final response = await http.post(
@@ -66,8 +58,7 @@ class CardRechargeScreenState extends State<CardRechargeScreen> {
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
-          'ipAddress': ipAddress,
-          'reseller_id': GlobalData.userData?['reseller_id'],
+          'app_id': GlobalData.userData?['app_id'],
         }),
       );
 
@@ -76,8 +67,7 @@ class CardRechargeScreenState extends State<CardRechargeScreen> {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         // Handle the fetched data as needed
         setState(() {
-          GlobalData.resellerData = responseData;
-          macController.text = GlobalData.resellerData?['mac_address'];
+          GlobalData.pppoeData = responseData['pppoe'];
           // Optionally update other state variables based on the fetched data
         });
 
@@ -101,14 +91,6 @@ class CardRechargeScreenState extends State<CardRechargeScreen> {
         print('Error occurred while fetching data: $e');
       }
     }
-  }
-
-  Future<void> _getIPAddress() async {
-    final NetworkInfo networkInfo = NetworkInfo();
-    String? ip = await networkInfo.getWifiIP();
-    setState(() {
-      _ipAddressController.text = ip ?? 'Unknown IP Address';
-    });
   }
 
   Future<bool> _onWillPop() async {
@@ -167,19 +149,15 @@ class CardRechargeScreenState extends State<CardRechargeScreen> {
             ],
             backgroundColor: TColors.tPrimaryColor,
           ),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(TSizes.tDefaultSize),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FormSection(
-                    ipAddressController: _ipAddressController,
-                    cardController: cardController,
-                    macController: macController,
-                  ),
-                ],
-              ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(TSizes.tDefaultSize),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FormSection(
+                  cardController: cardController,
+                ),
+              ],
             ),
           ),
         ),
@@ -189,15 +167,9 @@ class CardRechargeScreenState extends State<CardRechargeScreen> {
 }
 
 class FormSection extends StatefulWidget {
-  final TextEditingController ipAddressController;
   final TextEditingController cardController;
-  final TextEditingController macController;
-  final String? macAddress;
   const FormSection({
     super.key,
-    required this.ipAddressController,
-    required this.macController,
-    this.macAddress,
     required this.cardController,
   });
 
@@ -222,8 +194,6 @@ class FormSectionState extends State<FormSection> {
         body: jsonEncode(<String, dynamic>{
           'seller_id': GlobalData.userData?['reseller_id'],
           'code': widget.cardController.text,
-          'mac_address': widget.macController.text,
-          'ip_address': widget.ipAddressController.text,
           'user_id': GlobalData.userData?['id'], // Replace with actual user ID
           'device_key': GlobalData
               .userData?['device_key'], // Replace with actual device key
@@ -294,7 +264,7 @@ class FormSectionState extends State<FormSection> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('CARD RECHARGE',
+                  const Text('PAY YOUR BILL',
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
                   const Text(
@@ -322,30 +292,6 @@ class FormSectionState extends State<FormSection> {
                       }
                       return null;
                     },
-                  ),
-                  const SizedBox(height: 15),
-                  TextFormField(
-                    controller: widget.ipAddressController,
-                    enabled: false,
-                    decoration: InputDecoration(
-                      labelText: "IP Address",
-                      prefixIcon: const Icon(Icons.network_check),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-                  TextFormField(
-                    controller: widget.macController,
-                    enabled: false,
-                    decoration: InputDecoration(
-                      labelText: "MAC Address",
-                      prefixIcon: const Icon(Icons.perm_device_information),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                    ),
                   ),
                   const SizedBox(height: 15),
                   SizedBox(
