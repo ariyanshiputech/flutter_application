@@ -27,6 +27,7 @@ class ProfileScreen extends StatefulWidget {
 class ProfileScreenState extends State<ProfileScreen> {
   File? _profileImage;
   String _nameErrorMessage = '';
+  String _appidErrorMessage = '';
   bool _isSubmitting = false;
 
   @override
@@ -93,10 +94,15 @@ class ProfileScreenState extends State<ProfileScreen> {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         setState(() {
           _nameErrorMessage = responseData['errors']?['name']?.first ?? '';
+          _appidErrorMessage = responseData['errors']?['app_id']?.first ?? '';
 
           if (_nameErrorMessage.isNotEmpty) {
             SnackbarUtils.showSnackBar(
                 context, '', _nameErrorMessage, ContentType.failure);
+          }
+          if (_appidErrorMessage.isNotEmpty) {
+            SnackbarUtils.showSnackBar(
+                context, '', _appidErrorMessage, ContentType.failure);
           }
         });
 
@@ -228,6 +234,7 @@ class ProfileScreenState extends State<ProfileScreen> {
                   FormSection(
                     onSubmit: _submitForm,
                     nameErrorMessage: _nameErrorMessage,
+                    appidErrorMessage: _appidErrorMessage,
                     isSubmitting: _isSubmitting,
                   ),
                 ],
@@ -243,12 +250,14 @@ class ProfileScreenState extends State<ProfileScreen> {
 class FormSection extends StatefulWidget {
   final Future<void> Function(String, String) onSubmit;
   final String nameErrorMessage;
+  final String appidErrorMessage;
   final bool isSubmitting;
 
   const FormSection({
     super.key,
     required this.onSubmit,
     required this.nameErrorMessage,
+    required this.appidErrorMessage,
     required this.isSubmitting,
   });
 
@@ -263,11 +272,13 @@ class FormSectionState extends State<FormSection> {
       TextEditingController(text: GlobalData.userData?["app_id"]);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? nameError;
+  String? appidError;
 
   @override
   void initState() {
     super.initState();
     nameError = widget.nameErrorMessage;
+    appidError = widget.appidErrorMessage;
   }
 
   @override
@@ -276,6 +287,11 @@ class FormSectionState extends State<FormSection> {
     if (widget.nameErrorMessage != oldWidget.nameErrorMessage) {
       setState(() {
         nameError = widget.nameErrorMessage;
+      });
+    }
+    if (widget.appidErrorMessage != oldWidget.appidErrorMessage) {
+      setState(() {
+        appidError = widget.appidErrorMessage;
       });
     }
   }
@@ -329,7 +345,7 @@ class FormSectionState extends State<FormSection> {
                         borderRadius: BorderRadius.circular(10.0),
                         borderSide: BorderSide(
                             color:
-                                nameError != null ? Colors.red : Colors.grey),
+                                appidError != null ? Colors.red : Colors.grey),
                       ),
                     ),
                     validator: (value) {
@@ -347,6 +363,7 @@ class FormSectionState extends State<FormSection> {
                         if (_formKey.currentState!.validate()) {
                           setState(() {
                             nameError = null;
+                            appidError = null;
                           });
                           await widget.onSubmit(
                               nameController.text, appidController.text);

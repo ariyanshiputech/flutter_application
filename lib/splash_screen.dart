@@ -11,6 +11,7 @@ import 'package:flutter_application/welcome_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:lottie/lottie.dart';
 import 'package:platform_device_id_platform_interface/platform_device_id_platform_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -34,7 +35,8 @@ class SplashScreenState extends State<SplashScreen> {
     String? deviceId;
     try {
       if (kIsWeb) {
-        deviceId = await PlatformDeviceIdPlatform.instance.getDeviceId();
+        final prefs = await SharedPreferences.getInstance();
+        deviceId = prefs.getString('device_id');
       } else if (Platform.isAndroid) {
         AndroidDeviceInfo androidInfo = await deviceInfoPlugin.androidInfo;
         deviceId = androidInfo.androidId;
@@ -105,6 +107,12 @@ class SplashScreenState extends State<SplashScreen> {
           setState(() {
             isVerified = false;
           });
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          if (kDebugMode) {
+            print(responseData['demo']);
+          }
+          GlobalData.demo = responseData['demo'];
+
           Navigator.pushReplacement(
             // ignore: use_build_context_synchronously
             context,
@@ -120,6 +128,12 @@ class SplashScreenState extends State<SplashScreen> {
         setState(() {
           isVerified = false;
         });
+
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        if (kDebugMode) {
+          print(responseData['demo']);
+        }
+        GlobalData.demo = responseData['demo'];
         Navigator.pushReplacement(
           // ignore: use_build_context_synchronously
           context,

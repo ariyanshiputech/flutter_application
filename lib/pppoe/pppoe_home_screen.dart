@@ -11,6 +11,7 @@ import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/utils/constants/translate.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:intl/intl.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:quickalert/models/quickalert_type.dart';
@@ -36,7 +37,6 @@ class PppoeHomeScreenState extends State<PppoeHomeScreen> {
   bool _isPressed = false;
   bool lottieAnimate = false;
   String? ipAddress;
-  late WebViewController _webViewController; // Declare WebViewController
 
   @override
   void initState() {
@@ -101,8 +101,7 @@ class PppoeHomeScreenState extends State<PppoeHomeScreen> {
               child: CircleAvatar(
                 backgroundImage: decodedBytes != null
                     ? MemoryImage(decodedBytes)
-                    : const AssetImage(TImages.placeholderimage)
-                        as ImageProvider,
+                    : const AssetImage(TImages.user) as ImageProvider,
                 onBackgroundImageError: (_, __) {},
               ),
             ),
@@ -193,7 +192,7 @@ class PppoeHomeScreenState extends State<PppoeHomeScreen> {
                         children: [
                           Expanded(
                             child: _buildCustomImageButton(
-                              TImages.buyHotsot,
+                              TImages.payBill,
                               () {
                                 setState(() {
                                   _isPressed = !_isPressed;
@@ -240,31 +239,10 @@ class PppoeHomeScreenState extends State<PppoeHomeScreen> {
                       SizedBox(
                         height: 20,
                       ),
-                      // Replace 'AriyanShipu' with WebView widget
-                      Text(
-                        'SPEED TEST',
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: TColors.tPrimaryColor,
-                        ),
-                      ),
+                      buildStylishInfoGrid(),
 
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.9,
-                        height: 400,
-                        child: WebView(
-                          initialUrl: 'https://gfiber.speedtestcustom.com/',
-                          javascriptMode: JavascriptMode.unrestricted,
-                          onPageFinished: (String url) {
-                            _removeBranding(); // Call the method to remove branding after the page is loaded
-                          },
-                          onWebViewCreated:
-                              (WebViewController webViewController) {
-                            _webViewController = webViewController;
-                          },
-                        ),
-                      )
+                      //
+                      //
                     ],
                   ),
                 ),
@@ -276,7 +254,164 @@ class PppoeHomeScreenState extends State<PppoeHomeScreen> {
     );
   }
 
-  // Method to inject JavaScript and remove the branding element
+  Widget _buildStylishInfoGridItem({
+    required String title,
+    required String value,
+    required String iconPath,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade50, Colors.white],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 6,
+            offset: const Offset(2, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: Image.asset(
+              iconPath,
+              height: 24,
+              width: 24,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Bangla',
+                  color: Colors.blueGrey.shade700,
+                ),
+              ),
+              Text(
+                Translate.convertToBangla(value),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Bangla',
+                  color: Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildStylishInfoGrid() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9FAFB),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            spreadRadius: 2,
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildStylishInfoGridItem(
+                  title: 'মাসিক বিল',
+                  value: '৳ ${GlobalData.pppoeData!['amount']}',
+                  iconPath: 'assets/icons/monthly_bill.png',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStylishInfoGridItem(
+                  title: 'বকেয়া',
+                  value:
+                      '৳ ${_calculateTotalPppoesBills()}', // Dynamically calculate and show the total
+                  iconPath: 'assets/icons/balance_due.png',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildStylishInfoGridItem(
+                  title: 'প্যাকেজ',
+                  value: 'নিয়মিত',
+                  iconPath: 'assets/icons/package.png',
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildStylishInfoGridItem(
+                  title: 'শেষ তারিখ',
+                  value: DateFormat('dd-MM-yyyy').format(DateTime.parse(
+                      GlobalData.pppoeData?['billing_expire_date'])),
+                  iconPath: 'assets/icons/expire_date.png',
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _calculateTotalPppoesBills() {
+    // Ensure GlobalData.pppoesBills is not null and calculate the total
+    List<Map<String, dynamic>> pppoesBills = (GlobalData.pppoesBills ?? [])
+        .whereType<
+            Map<String,
+                dynamic>>() // Ensure each item is a Map<String, dynamic>
+        .toList();
+
+    double total = pppoesBills.fold(0.0, (sum, bill) {
+      final amount = bill['amount'];
+      return sum + (amount is num ? amount.toDouble() : 0.0);
+    });
+
+    // Safely handle the type conversion for GlobalData.pppoeData!['amount']
+    double pppoeAmount = (GlobalData.pppoeData?['amount'] is num)
+        ? (GlobalData.pppoeData!['amount'] as num).toDouble()
+        : 0.0;
+
+    // If GlobalData.pppoeData!['amount'] is less than the total, show 0.00
+    if (pppoeAmount < total) {
+      return '0.00';
+    }
+
+    // Format the total to remove .0 if it's a whole number
+    return total % 1 == 0 ? total.toInt().toString() : total.toStringAsFixed(2);
+  }
 
   Widget _buildCustomImageButton(String imagePath, VoidCallback onPressed) {
     return GestureDetector(
@@ -359,15 +494,4 @@ class PppoeHomeScreenState extends State<PppoeHomeScreen> {
   }
 
   // Method to inject JavaScript and remove the header, branding, and display the speedtest logo
-  void _removeBranding() {
-    _webViewController.runJavascript("""
-    // Remove the <header> tag from the page
-    var headerElement = document.querySelector('header');
-    if (headerElement) {
-      headerElement.remove();
-    }
-
-
-  """);
-  }
 }

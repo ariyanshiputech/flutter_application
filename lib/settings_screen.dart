@@ -169,7 +169,7 @@ class SettingsScreenState extends State<SettingsScreen> {
                   userName: GlobalData.userData?['name'] ?? 'N/A',
                   userProfilePic: decodedBytes != null
                       ? MemoryImage(decodedBytes!)
-                      : const AssetImage(TImages.placeholderimage),
+                      : const AssetImage(TImages.user),
                   userPhone: GlobalData.userData?['phone'] ?? '',
                   cardActionWidget: SettingsItem(
                     icons: Icons.edit,

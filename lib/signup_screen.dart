@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application/alert_builder.dart';
 import 'package:flutter_application/otp_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
+import 'package:flutter_application/utils/snackbar_utils.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application/utils/constants/image_strings.dart';
@@ -33,6 +34,7 @@ class SignUpScreenState extends State<SignUpScreen> {
   File? _profileImage;
   String _phoneErrorMessage = '';
   String _nameErrorMessage = '';
+  String _appIdErrorMessage = '';
   bool _isSubmitting = false;
 
   @override
@@ -184,53 +186,23 @@ class SignUpScreenState extends State<SignUpScreen> {
         setState(() {
           _nameErrorMessage = responseData['errors']?['name']?.first ?? '';
           _phoneErrorMessage = responseData['errors']?['phoneNo']?.first ?? '';
+          _appIdErrorMessage = responseData['errors']?['appId']?.first ?? '';
 
           if (_nameErrorMessage.isNotEmpty) {
-            final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: '',
-                message: _nameErrorMessage,
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
+            SnackbarUtils.showSnackBar(
+                context, '', _nameErrorMessage, ContentType.failure);
           }
-
-          if (_nameErrorMessage.isEmpty && _phoneErrorMessage.isNotEmpty) {
-            final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Oops!',
-                message: _phoneErrorMessage,
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
+          if (_phoneErrorMessage.isNotEmpty) {
+            SnackbarUtils.showSnackBar(
+                context, '', _phoneErrorMessage, ContentType.failure);
           }
-
+          if (_appIdErrorMessage.isNotEmpty) {
+            SnackbarUtils.showSnackBar(
+                context, '', _appIdErrorMessage, ContentType.failure);
+          }
           if (response.statusCode == 401) {
-            final snackBar = SnackBar(
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.transparent,
-              content: AwesomeSnackbarContent(
-                title: 'Oops!',
-                message: responseData['message'],
-                contentType: ContentType.failure,
-              ),
-            );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
+            SnackbarUtils.showSnackBar(
+                context, '', responseData['message'], ContentType.failure);
           }
         });
 
@@ -333,6 +305,7 @@ class SignUpScreenState extends State<SignUpScreen> {
                         ipAddressController: _ipAddressController,
                         onSubmit: _submitForm,
                         nameErrorMessage: _nameErrorMessage,
+                        appIdErrorMessage: _appIdErrorMessage,
                         phoneErrorMessage: _phoneErrorMessage,
                         isSubmitting: _isSubmitting,
                       ),
@@ -353,6 +326,7 @@ class FormSection extends StatefulWidget {
   final TextEditingController ipAddressController;
   final Future<void> Function(String, String, String) onSubmit; // Updated
   final String nameErrorMessage;
+  final String appIdErrorMessage;
   final String phoneErrorMessage;
   final bool isSubmitting;
 
@@ -362,6 +336,7 @@ class FormSection extends StatefulWidget {
     required this.ipAddressController,
     required this.onSubmit,
     required this.nameErrorMessage,
+    required this.appIdErrorMessage,
     required this.phoneErrorMessage,
     required this.isSubmitting,
   });
@@ -377,12 +352,14 @@ class FormSectionState extends State<FormSection> {
       TextEditingController(); // Added
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? nameError;
+  String? appidError;
   String? phoneError;
 
   @override
   void initState() {
     super.initState();
     nameError = widget.nameErrorMessage;
+    appidError = widget.appIdErrorMessage;
     phoneError = widget.phoneErrorMessage;
   }
 
@@ -397,6 +374,12 @@ class FormSectionState extends State<FormSection> {
     if (widget.phoneErrorMessage != oldWidget.phoneErrorMessage) {
       setState(() {
         phoneError = widget.phoneErrorMessage;
+      });
+    }
+
+    if (widget.appIdErrorMessage != oldWidget.appIdErrorMessage) {
+      setState(() {
+        phoneError = widget.appIdErrorMessage;
       });
     }
   }

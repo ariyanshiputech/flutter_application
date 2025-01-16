@@ -2,7 +2,7 @@ name: flutter_application
 description: "A new Flutter project."
 publish_to: "none"
 
-version: 2.0.4
+version: 3.0.0
 
 environment:
   sdk: ">=3.4.3 <4.0.0"
@@ -50,7 +50,6 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   babstrap_settings_screen: ^0.1.6
   settings_ui: ^2.0.2
-  flutter_share: ^2.0.0
   path_provider: ^2.1.4
   flutter_internet_speed_test: ^1.0.1
   webview_flutter: ^2.8.0
@@ -66,8 +65,10 @@ flutter:
 
   assets:
     - assets/logos/
+    - assets/icons/
     - assets/images/content/
     - assets/images/banners/
+    - assets/images/
 
   fonts:
     - family: Bangla

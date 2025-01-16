@@ -13,6 +13,7 @@ import 'package:flutter_application/profile_screen.dart';
 import 'package:flutter_application/utils/constants/colors.dart';
 import 'package:flutter_application/utils/constants/image_strings.dart';
 import 'package:flutter_application/utils/constants/translate.dart';
+import 'package:flutter_application/utils/snackbar_utils.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:network_info_plus/network_info_plus.dart';
@@ -104,8 +105,7 @@ class HomeScreenState extends State<HomeScreen> {
               child: CircleAvatar(
                 backgroundImage: decodedBytes != null
                     ? MemoryImage(decodedBytes)
-                    : const AssetImage(TImages.placeholderimage)
-                        as ImageProvider,
+                    : const AssetImage(TImages.user) as ImageProvider,
                 onBackgroundImageError: (_, __) {},
               ),
             ),
@@ -343,19 +343,8 @@ class HomeScreenState extends State<HomeScreen> {
         });
 
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'Yeah!',
-            message: responseData['message'],
-            contentType: ContentType.success,
-          ),
-        );
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
+        SnackbarUtils.showSnackBar(
+            context, 'Yeah!', responseData['message'], ContentType.success);
       } else {
         setState(() {
           lottieAnimate = false;
@@ -364,38 +353,15 @@ class HomeScreenState extends State<HomeScreen> {
         if (kDebugMode) {
           print(responseData);
         }
-        final snackBar = SnackBar(
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          content: AwesomeSnackbarContent(
-            title: 'Opps!',
-            message: responseData['message'],
-            contentType: ContentType.failure,
-          ),
-        );
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(snackBar);
+        SnackbarUtils.showSnackBar(
+            context, 'Opps!', responseData['message'], ContentType.failure);
       }
     } else {
       setState(() {
         lottieAnimate = false;
       });
-
-      final snackBar = SnackBar(
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.transparent,
-        content: AwesomeSnackbarContent(
-          title: 'Opps!',
-          message: 'Missing required information.',
-          contentType: ContentType.failure,
-        ),
-      );
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(snackBar);
+      SnackbarUtils.showSnackBar(context, 'Opps!',
+          'Missing required information.', ContentType.failure);
     }
   }
 

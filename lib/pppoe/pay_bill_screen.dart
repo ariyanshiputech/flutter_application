@@ -13,7 +13,6 @@ import 'package:flutter_application/pppoe/payment_invoice_screen.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_application/utils/constants/sizes.dart';
-import 'package:network_info_plus/network_info_plus.dart';
 
 class PayBillScreen extends StatefulWidget {
   const PayBillScreen({super.key});
@@ -23,20 +22,31 @@ class PayBillScreen extends StatefulWidget {
 }
 
 class PayBillScreenState extends State<PayBillScreen> {
+  bool _isDataFetched = false;
+
   @override
   void initState() {
     super.initState();
-    _fetchData();
+    // Initialization logic that doesn't depend on context
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ensure _fetchData runs only once
+    if (!_isDataFetched) {
+      _isDataFetched = true;
+
+      // Delay context-dependent operations to after widget build
+      Future.microtask(() => _fetchData());
+    }
   }
 
   Future<void> _fetchData() async {
     final url = Uri.https('lalpoolnetwork.net', '/api/v2/apps/get_pppoe_info');
-    final NetworkInfo networkInfo = NetworkInfo();
-    // ignore: unused_local_variable
-    String? ip = await networkInfo.getWifiIP();
 
     try {
-      AlertBuilder.showLoadingDialog(context);
+      AlertBuilder.showLoadingDialog(context); // Now safe to call
       final response = await http.post(
         url,
         headers: <String, String>{
@@ -53,10 +63,8 @@ class PayBillScreenState extends State<PayBillScreen> {
           GlobalData.pppoeData = responseData['pppoe'];
           GlobalData.pppoesBills = responseData['bills'];
         });
-        AlertBuilder.hideLoadingDialog(context);
       } else {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
-        AlertBuilder.hideLoadingDialog(context);
         SnackbarUtils.showSnackBar(
           context,
           'Oops',
@@ -65,10 +73,11 @@ class PayBillScreenState extends State<PayBillScreen> {
         );
       }
     } catch (e) {
-      AlertBuilder.hideLoadingDialog(context);
       if (kDebugMode) {
         print('Error occurred while fetching data: $e');
       }
+    } finally {
+      AlertBuilder.hideLoadingDialog(context);
     }
   }
 
@@ -96,7 +105,7 @@ class PayBillScreenState extends State<PayBillScreen> {
               onPressed: _navigateToMainScreen,
             ),
             title: const Text(
-              'Card Recharge',
+              'Pay Your Bill',
               style: TextStyle(fontSize: 16),
             ),
             actions: [
