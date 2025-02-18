@@ -12,7 +12,6 @@ import 'package:flutter_application/utils/constants/translate.dart';
 import 'package:flutter_application/utils/theme/theme.dart';
 import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
 import 'package:intl/intl.dart';
-import 'package:network_info_plus/network_info_plus.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:quickalert/models/quickalert_type.dart';
 import 'package:quickalert/widgets/quickalert_dialog.dart';
@@ -36,14 +35,16 @@ class PppoeHomeScreenState extends State<PppoeHomeScreen> {
       .millisecondsSinceEpoch;
   bool _isPressed = false;
   bool lottieAnimate = false;
-  String? ipAddress;
 
   @override
   void initState() {
     super.initState();
-    _getIPAddress();
     _checkForUpdates(); // Check for updates
     WebView.platform = SurfaceAndroidWebView(); // Initialize WebView
+    if (kDebugMode) {
+      // ignore: prefer_interpolation_to_compose_strings
+      print(GlobalData.pppoeData?['billing_expire_date']);
+    }
   }
 
   Future<void> _checkForUpdates() async {
@@ -62,14 +63,6 @@ class PppoeHomeScreenState extends State<PppoeHomeScreen> {
         print('Failed to check for updates: $e');
       }
     }
-  }
-
-  Future<void> _getIPAddress() async {
-    final NetworkInfo networkInfo = NetworkInfo();
-    String? ip = await networkInfo.getWifiIP();
-    setState(() {
-      ipAddress = ip ?? 'Unknown IP Address';
-    });
   }
 
   @override

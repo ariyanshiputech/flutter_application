@@ -70,7 +70,7 @@ class BuyHotspotScreenState extends State<BuyHotspotScreen> {
       }
       amountController.text = (validity * hotPrice).toString();
       isPaymentEnabled = amountController.text.isNotEmpty &&
-          int.parse(amountController.text) > 0;
+          int.parse(amountController.text) >= 50;
     });
   }
 
@@ -314,6 +314,13 @@ class FormSectionState extends State<FormSection> {
                       '(Make your Journey easy with connect out first internet service.)',
                       style: TextStyle(
                           fontWeight: FontWeight.normal, fontSize: 12)),
+                  const Text(
+                      'বিকাশের রেট লিমিটের কারনে, আপনার টাকার পরিমান অবশ্যই ৫০ এর উপরে হতে হবে।',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: Color(0xFFFF0000),
+                          fontFamily: 'Bangla')),
                   const SizedBox(height: TSizes.tFormHeight - 10),
                   const SizedBox(height: 15),
                   TextFormField(

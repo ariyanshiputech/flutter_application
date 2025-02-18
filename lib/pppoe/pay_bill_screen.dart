@@ -159,14 +159,38 @@ class FormSectionState extends State<FormSection> {
   void initState() {
     super.initState();
     _initializeRunningDate();
+    _initializeDefaultSelection();
   }
 
   void _initializeRunningDate() {
     final now = DateTime.now();
     runningMonth = _getMonthName(now.month);
     runningYear = now.year.toString();
+
     if (kDebugMode) {
       print("Running Month: $runningMonth, Running Year: $runningYear");
+    }
+  }
+
+  void _initializeDefaultSelection() {
+    final bills = GlobalData.pppoesBills ?? [];
+    if (bills.isNotEmpty) {
+      // Attempt to find the running month and year in the bills
+      final runningBill = bills.firstWhere(
+        (bill) =>
+            bill['month'] == runningMonth &&
+            bill['year'].toString() == runningYear,
+        orElse: () => null,
+      );
+
+      if (runningBill != null) {
+        selectedMonth = runningBill['month'];
+        selectedYear = runningBill['year'].toString();
+      } else {
+        // If no running month is found, default to the first available bill
+        selectedMonth = bills[0]['month'];
+        selectedYear = bills[0]['year'].toString();
+      }
     }
   }
 
@@ -257,34 +281,25 @@ class FormSectionState extends State<FormSection> {
                           itemCount: yearBills.length,
                           itemBuilder: (BuildContext context, int index) {
                             final month = yearBills[index]['month'];
-                            bool isRunningMonthAndYear =
-                                year == runningYear && month == runningMonth;
                             bool isSelected =
                                 selectedMonth == month && selectedYear == year;
 
                             return GestureDetector(
-                              onTap: isRunningMonthAndYear
-                                  ? () {
-                                      setState(() {
-                                        selectedMonth = month;
-                                        selectedYear = year;
-                                      });
-                                    }
-                                  : null,
+                              onTap: () {
+                                setState(() {
+                                  selectedMonth = month;
+                                  selectedYear = year;
+                                });
+                              },
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? Colors.blue.shade100
-                                      : isRunningMonthAndYear
-                                          ? Colors.white
-                                          : Colors.white,
+                                      : Colors.white,
                                   borderRadius: BorderRadius.circular(10.0),
                                   border: Border.all(
-                                    color: isSelected
-                                        ? Colors.blue
-                                        : isRunningMonthAndYear
-                                            ? Colors.grey
-                                            : Colors.grey,
+                                    color:
+                                        isSelected ? Colors.blue : Colors.grey,
                                     width: 1.0,
                                   ),
                                 ),
@@ -292,11 +307,8 @@ class FormSectionState extends State<FormSection> {
                                 child: Text(
                                   month,
                                   style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.blue
-                                        : isRunningMonthAndYear
-                                            ? Colors.black
-                                            : Colors.black,
+                                    color:
+                                        isSelected ? Colors.blue : Colors.black,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -328,24 +340,15 @@ class FormSectionState extends State<FormSection> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () async {
-                          if (selectedMonth == runningMonth &&
-                              selectedYear == runningYear) {
-                            final totalAmount = _calculateTotalAmount();
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PaymentInvoiceScreen(
-                                  totalAmount: totalAmount,
-                                ),
+                          final totalAmount = _calculateTotalAmount();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => PaymentInvoiceScreen(
+                                totalAmount: totalAmount,
                               ),
-                            );
-                          } else {
-                            SnackbarUtils.showSnackBar(
-                                context,
-                                'Oops!',
-                                'Please select the running month',
-                                ContentType.failure);
-                          }
+                            ),
+                          );
                         },
                         child: const Text("NEXT"),
                       ),
